@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const schemeRoutes = require("./routes/schemeRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 
+
 // Load environment variables
 dotenv.config();
 
@@ -28,3 +29,4 @@ app.use("/api/reminders", reminderRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+require("./utils/sendEmail.js");
