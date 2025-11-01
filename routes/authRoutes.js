@@ -1,5 +1,7 @@
 const User = require("../models/user");
 const express = require("express");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({extended: true}));
@@ -16,14 +18,30 @@ router.post("/login", async (req, res) => {
     const isMatch = await user.matchPassword(password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
+    
+    // Create JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
 
-    res.status(200).json({ message: "Login successful", user });
+    // Respond with token
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-// ✅ Register User API
+// Register User API
 router.post("/register", async (req, res) => {
   const { name, email, occupation, password, income, state, age, gender, caste } = req.body;
 

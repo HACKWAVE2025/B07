@@ -3,8 +3,11 @@ const router = express.Router();
 const Reminder = require("../models/Reminder");
 const Scheme = require("../models/Scheme");
 
+const verifyToken = require("../middleware/authMiddleware");
+
+
 // Create a new reminder
-router.post("/", async (req, res) => {
+router.post("/create", verifyToken,async (req, res) => {
   try {
     const { userId, schemeId, type, reminderDate } = req.body;
 
@@ -19,7 +22,7 @@ router.post("/", async (req, res) => {
 });
 
 //  Get all reminders for a user
-router.get("/user/:userId", async (req, res) => {
+router.get("/get/:userId",verifyToken, async (req, res) => {
   try {
     const reminders = await Reminder.find({ userId: req.params.userId })
       .populate("schemeId", "title description authority category state")
@@ -33,7 +36,7 @@ router.get("/user/:userId", async (req, res) => {
 });
 
 //  Delete a reminder
-router.delete("/:id", async (req, res) => {
+router.delete("/delete/:id",verifyToken, async (req, res) => {
   try {
     await Reminder.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Reminder deleted successfully" });
