@@ -284,7 +284,7 @@ connectDB().then(async () => {
         const stateData = require("./statedata.js");
 
         // const result = await Scheme.insertMany(moreCentralSchemes);
-        const result = await Scheme.insertMany(stateData);
+        // const result = await Scheme.insertMany(stateData);
 
         console.log("successfull");
 
