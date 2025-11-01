@@ -5,7 +5,7 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 // Get all schemes
-router.get("/", async (req, res) => {
+router.get("/get", async (req, res) => {
   try {
     const schemes = await Scheme.find();
     console.log(schemes);
