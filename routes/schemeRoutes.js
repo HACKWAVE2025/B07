@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Scheme = require("../models/Scheme");
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 
 // Get all schemes
 router.get("/", async (req, res) => {
   try {
     const schemes = await Scheme.find();
+    console.log(schemes);
     res.status(200).json(schemes);
   } catch (error) {
     console.error("Error fetching schemes:", error);
@@ -14,9 +17,9 @@ router.get("/", async (req, res) => {
 });
 
 // Combined filter: authority + category + state
-router.get("/authoritycategory/:authority/:category/:state?", async (req, res) => {
+router.get("/authoritycategory", async (req, res) => {
   try {
-    const { authority, state, category } = req.params;
+    const { authority, state, category } = req.query;
     const query = {};
 
     if (authority) query.authority = authority;
@@ -32,9 +35,9 @@ router.get("/authoritycategory/:authority/:category/:state?", async (req, res) =
 });
 
 // Get all schemes based on authority & (optional) state
-router.get("/authority/:authority/:state?", async (req, res) => {
+router.get("/authority", async (req, res) => {
   try {
-    const { authority, state } = req.params;
+    const { authority, state } = req.query;
     const query = { authority };
 
     if (state && state !== "All") query.state = state;

@@ -4,7 +4,7 @@
 
 =>routes for schemes
     >/api/schemes/ --get all schemes
-    >/api/schemes//authority/:authority/:state? --get schemes based on authority
+    >/api/schemes//authority --get schemes based on authority
     >/api/schemes/category/:category --get schemes based on category
-    >/api/schemes/authoritycategory/:authority/:category/:state? --get schemes based on authority,category and state
+    >/api/schemes/authoritycategory --get schemes based on authority,category and state
 

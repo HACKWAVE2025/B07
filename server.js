@@ -17,10 +17,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));    
 
 // Routes
 app.use("/api/users", authRoutes);
-// app.use("/api/schemes", schemeRoutes);
+app.use("/api/schemes", schemeRoutes);
 // app.use("/api/reminders", reminderRoutes);
 
 
