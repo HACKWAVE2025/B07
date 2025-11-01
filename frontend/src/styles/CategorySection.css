@@ -1,0 +1,135 @@
+/* Category Section Styles */
+.category-section {
+  padding: 3rem 5%;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.category-section h2 {
+  color: #06038D;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.category-section h2::after {
+  content: '';
+  position: absolute;
+  width: 60%;
+  height: 4px;
+  background-color: #FF671F;
+  bottom: -10px;
+  left: 20%;
+  border-radius: 2px;
+}
+
+.category-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.category-btn {
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #06038D;
+  background-color: white;
+  color: #06038D;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-btn.active {
+  background-color: #06038D;
+  color: white;
+  border-color: #06038D;
+}
+
+.occupation-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.occupation-section h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.occupation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.occupation-btn {
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.occupation-btn:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .category-section {
+    padding: 2rem 1rem;
+  }
+  
+  .category-buttons {
+    gap: 0.8rem;
+  }
+  
+  .category-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .occupation-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .occupation-buttons {
+    gap: 0.8rem;
+  }
+  
+  .occupation-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
