@@ -27,6 +27,9 @@ const CategorySection = () => {
   });
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState('');
+  const [error, setError] = useState('');
+
   useEffect(() => {
     fetchSchemes();
     // eslint-disable-next-line
@@ -37,32 +40,69 @@ const CategorySection = () => {
     try {
       let endpoint = '/schemes/get';
       let params = {};
-      // Build hierarchy of endpoints for precision/responsiveness
-      if (filters.category && !filters.occupation && !filters.state) {
-        // Only category filter
-        endpoint = `/schemes/category/${filters.category}`;
-      }
-      if (filters.category && (filters.occupation || filters.state)) {
+      let routeLabel = '/api/schemes/get';
+
+      // Determine which endpoint to use based on filters
+      // Frontend "category" maps to backend "authority"
+      // Frontend "occupation" maps to backend "category"
+      
+      const hasAuthority = filters.category && filters.category !== '';
+      const hasState = filters.state && filters.state !== '';
+      const hasOccupation = filters.occupation && filters.occupation !== '';
+
+      if (hasAuthority && (hasOccupation || hasState)) {
+        // Use authoritycategory endpoint when authority + category/state are selected
         endpoint = '/schemes/authoritycategory';
         params = {
           authority: filters.category,
-          state: filters.state || undefined,
-          category: filters.occupation || undefined,
         };
-      }
-      if (filters.category === 'central' && !filters.occupation && !filters.state) {
+        if (hasState) params.state = filters.state;
+        if (hasOccupation) params.category = filters.occupation;
+        
+        const queryString = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
+        routeLabel = `/api/schemes/authoritycategory?${queryString}`;
+      } else if (hasAuthority) {
+        // Use authority endpoint when only authority is selected
+        endpoint = '/schemes/authority';
+        params = {
+          authority: filters.category,
+        };
+        routeLabel = `/api/schemes/authority?authority=${filters.category}`;
+      } else if (hasOccupation && !hasAuthority) {
+        // If only occupation is selected, use category endpoint
+        endpoint = `/schemes/category/${filters.occupation}`;
+        routeLabel = `/api/schemes/category/${filters.occupation}`;
+      } else {
+        // Default: get all schemes
         endpoint = '/schemes/get';
+        routeLabel = '/api/schemes/get';
         params = {};
       }
-      // Make request and set data
+
+      setCurrentRoute(routeLabel);
+
       const res = await api.get(endpoint, { params });
-      let filtered = res.data || [];
-      if (filters.search) {
-        filtered = filtered.filter(s => s.name?.toLowerCase().includes(filters.search.toLowerCase()));
+      
+      // Handle response - backend returns array directly
+      let schemesData = res.data;
+      if (!Array.isArray(schemesData)) {
+        schemesData = [];
       }
+      
+      // Apply search filter on client side
+      let filtered = schemesData;
+      if (filters.search && filters.search.trim() !== '') {
+        filtered = schemesData.filter(s => 
+          s.name?.toLowerCase().includes(filters.search.toLowerCase())
+        );
+      }
+      
       setSchemes(filtered);
+      setError('');
     } catch (e) {
+      console.error('Error fetching schemes:', e);
       setSchemes([]);
+      setError(e.response?.data?.message || e.message || 'Failed to fetch schemes. Please check your backend connection.');
     } finally {
       setLoading(false);
     }
@@ -70,7 +110,6 @@ const CategorySection = () => {
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => {
-      // Reset dependent filters as appropriate
       if (field === 'category') {
         return { ...prev, category: value, occupation: '', state: '', search: '' };
       }
@@ -138,11 +177,22 @@ const CategorySection = () => {
         </div>
       </aside>
       <main className="scheme-results-area">
+        <div style={{marginBottom: '1rem'}}>
+          <span style={{fontSize: '0.96rem', color: '#666'}}>Route Used: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
+        </div>
         <h2 className="results-title">Schemes</h2>
+        {error && (
+          <div style={{padding: '1rem', background: '#fff0f0', border: '1px solid #f5c2c2', borderRadius: '6px', color: '#a00', marginBottom: '1rem'}}>
+            {error}
+          </div>
+        )}
         {loading ? (
-          <div>Loading schemes...</div>
+          <div style={{padding: '2rem', textAlign: 'center'}}>Loading schemes...</div>
         ) : schemes.length === 0 ? (
-          <div>No schemes match your filters.</div>
+          <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
+            No schemes match your filters.
+            {!loading && <div style={{marginTop: '0.5rem', fontSize: '0.9rem'}}>Try adjusting your filters or check if the backend is running.</div>}
+          </div>
         ) : (
           <div className="schemes-list">
             {schemes.map(scheme => (
