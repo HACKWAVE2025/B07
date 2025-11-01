@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
-const userRoutes = require("./routes/authRoutes");
+const authRoutes = require("./routes/authRoutes");
 const schemeRoutes = require("./routes/schemeRoutes");
 const reminderRoutes = require("./routes/eligibilityRoutes");
 
@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// app.use("/api/users", userRoutes);
+app.use("/api/users", authRoutes);
 // app.use("/api/schemes", schemeRoutes);
 // app.use("/api/reminders", reminderRoutes);
 
