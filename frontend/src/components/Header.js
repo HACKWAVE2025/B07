@@ -1,22 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Header.css';
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const navigate = useNavigate(); // move outside of any conditional
+  const navigate = useNavigate();
+  const location = useLocation();
   const dropdownRef = useRef();
 
+  // Check for user on mount and when route changes (e.g., after login)
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const currentUser = localStorage.getItem('currentUser');
-    if (token && currentUser) {
-      setUser(JSON.parse(currentUser));
-    } else {
-      setUser(null);
-    }
-  }, []);
+    const checkUser = () => {
+      const token = localStorage.getItem('token');
+      const currentUser = localStorage.getItem('currentUser');
+      if (token && currentUser) {
+        try {
+          setUser(JSON.parse(currentUser));
+        } catch (e) {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    // Check immediately and on route changes (catches login redirects)
+    checkUser();
+  }, [location]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -56,24 +67,21 @@ const Header = () => {
             <button
               className="profile-trigger"
               onClick={() => setDropdownOpen((open) => !open)}
-              style={{ padding: '0.5rem 1.5rem', background: 'transparent', border: '2px solid #FF671F', borderRadius: 4, cursor: 'pointer', fontWeight: 600 }}
             >
               {user.name ? user.name.split(' ')[0] : user.email}
-              <span style={{ marginLeft: 8 }}>▼</span>
+              <span className="dropdown-arrow">▼</span>
             </button>
             {dropdownOpen && (
-              <div className="profile-dropdown" style={{ position: 'absolute', background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,0.18)', minWidth: 160, right: 0, zIndex: 10, borderRadius: 6 }}>
+              <div className="profile-dropdown">
                 <Link
                   to="#"
                   className="profile-dropdown-item"
-                  style={{ padding: '0.75rem 1.5rem', display: 'block', color: '#06038D', borderBottom: '1px solid #eee', textDecoration: 'none', fontWeight: 500 }}
                   onClick={() => { setDropdownOpen(false); alert('Profile Settings coming soon.'); }}
                 >
                   Profile Settings
                 </Link>
                 <button
                   className="profile-dropdown-item"
-                  style={{ padding: '0.75rem 1.5rem', display: 'block', width: '100%', background: 'none', border: 'none', color: '#FF671F', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
                   onClick={handleLogout}
                 >
                   Logout

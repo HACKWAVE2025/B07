@@ -7,7 +7,7 @@ const verifyToken = require("../middleware/authMiddleware");
 
 
 // Create a new reminder
-router.post("/create", verifyToken,async (req, res) => {
+router.post("/create",async (req, res) => {
   try {
     const { userId, schemeId, type, reminderDate } = req.body;
 
