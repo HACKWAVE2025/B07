@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import '../styles/CategorySection.css';
 import api from '../utils/api';
+import { LanguageContext } from '../context/LanguageContext';
 
 const categories = [
-  { id: 'central', name: 'Central Schemes', authority: 'central' },
-  { id: 'state', name: 'State Schemes', authority: 'state' },
-  { id: 'private', name: 'Private Schemes', authority: 'private' },
+  { id: 'central', authority: 'central' },
+  { id: 'state', authority: 'state' },
+  { id: 'private', authority: 'private' },
 ];
 
 const occupations = {
@@ -29,6 +30,7 @@ const CategorySection = () => {
   const [loading, setLoading] = useState(false);
   const [currentRoute, setCurrentRoute] = useState('');
   const [error, setError] = useState('');
+  const { t, language } = useContext(LanguageContext);
 
   useEffect(() => {
     fetchSchemes();
@@ -131,7 +133,7 @@ const CategorySection = () => {
       <aside className="category-sidebar">
         <h2>Filters</h2>
         <div className="filter-group">
-          <label>Scheme Category</label>
+          <label>{t('category.schemeCategory')}</label>
           <div className="filter-btns-vertical">
             {categories.map(c => (
               <button
@@ -139,48 +141,48 @@ const CategorySection = () => {
                 className={`side-category-btn${filters.category === c.id ? ' active' : ''}`}
                 onClick={() => handleFilterChange('category', c.id)}
               >
-                {c.name}
+                {t(`category.${c.id}`)}
               </button>
             ))}
           </div>
         </div>
         <div className="filter-group">
-          <label>Occupation</label>
+          <label>{t('category.occupation')}</label>
           <select
             value={filters.occupation}
             onChange={e => handleFilterChange('occupation', e.target.value)}
             disabled={!filters.category}
           >
-            <option value="">All</option>
+            <option value="">{t('category.all')}</option>
             {(occupations[filters.category] || []).map(o => (
               <option key={o} value={o}>{o}</option>
             ))}
           </select>
         </div>
         <div className="filter-group">
-          <label>State</label>
+          <label>{t('category.stateLabel')}</label>
           <select value={filters.state} onChange={e => handleFilterChange('state', e.target.value)}>
-            <option value="">All States</option>
+            <option value="">{t('category.allStates')}</option>
             {states.map(state => (
               state && <option key={state} value={state}>{state}</option>
             ))}
           </select>
         </div>
         <div className="filter-group">
-          <label>Search by name</label>
+          <label>{t('category.searchByName')}</label>
           <input
             type="text"
             value={filters.search}
             onChange={e => handleFilterChange('search', e.target.value)}
-            placeholder="Ex: Kisan..."
+            placeholder={t('category.searchPlaceholderExample')}
           />
         </div>
       </aside>
       <main className="scheme-results-area">
         <div style={{marginBottom: '1rem'}}>
-          <span style={{fontSize: '0.96rem', color: '#666'}}>Route Used: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
+          <span style={{fontSize: '0.96rem', color: '#666'}}>{t('category.routeUsed')}: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
         </div>
-        <h2 className="results-title">Schemes</h2>
+        <h2 className="results-title">{t('category.schemes')}</h2>
         {error && (
           <div style={{padding: '1rem', background: '#fff0f0', border: '1px solid #f5c2c2', borderRadius: '6px', color: '#a00', marginBottom: '1rem'}}>
             {error}
@@ -197,11 +199,11 @@ const CategorySection = () => {
           <div className="schemes-list">
             {schemes.map(scheme => (
               <div className="scheme-card" key={scheme._id || scheme.id}>
-                <h3>{scheme.name}</h3>
-                <p><b>Category:</b> {scheme.category || scheme.occupation}</p>
-                <p><b>State:</b> {scheme.state || 'All'}</p>
-                <p><b>Authority:</b> {scheme.authority || filters.category}</p>
-                <p className="scheme-description">{scheme.description || 'No description.'}</p>
+                <h3>{(language === 'hi' && (scheme.name_hi || scheme.name_hindi)) ? (scheme.name_hi || scheme.name_hindi) : (language === 'te' && scheme.name_te) ? scheme.name_te : (scheme.name || scheme.title)}</h3>
+                <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation}</p>
+                <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
+                <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category}</p>
+                <p className="scheme-description">{(language === 'hi' && (scheme.description_hi || scheme.description_hindi)) ? (scheme.description_hi || scheme.description_hindi) : (language === 'te' && scheme.description_te) ? scheme.description_te : (scheme.description || t('category.noDescription'))}</p>
               </div>
             ))}
           </div>

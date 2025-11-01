@@ -1,7 +1,8 @@
 //Login.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { LanguageContext } from '../context/LanguageContext';
 
 // backend base URL (can be configured via env REACT_APP_API_URL)
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -14,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useContext(LanguageContext);
 
   const { email, password } = formData;
 
@@ -61,12 +63,12 @@ const Login = () => {
     <div className="container section">
       <div className="container" style={{ maxWidth: 480, margin: '0 auto' }}>
         <div className="section-title">
-          <h2>Sign in to your account</h2>
+          <h2>{t('login.title')}</h2>
         </div>
 
         <div className="auth-card">
           <p style={{ textAlign: 'center' }}>
-            Or <Link to="/register" className="btn-secondary" style={{ padding: '0.25rem 0.6rem', borderRadius: 4 }}>create a new account</Link>
+            {t('login.orCreate')} <Link to="/register" className="btn-secondary" style={{ padding: '0.25rem 0.6rem', borderRadius: 4 }}>{t('login.createAccount')}</Link>
           </p>
 
           {error && (
@@ -77,12 +79,12 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <div>
-              <label>Email address</label>
+              <label>{t('login.email')}</label>
               <input name="email" type="email" value={email} onChange={handleChange} required />
             </div>
 
             <div style={{ marginTop: '1rem' }}>
-              <label>Password</label>
+              <label>{t('login.password')}</label>
               <input name="password" type="password" value={password} onChange={handleChange} required />
             </div>
 
@@ -108,14 +110,14 @@ const Login = () => {
       type="checkbox"
       style={{ verticalAlign: 'middle', transform: 'translateY(-1px)' }}
     />
-    <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>Remember me</span>
+    <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{t('login.rememberMe')}</span>
   </label>
-  <a href="#">Forgot your password?</a>
+  <a href="#">{t('login.forgotPassword')}</a>
 </div>
 
 
             <div style={{ marginTop: '1rem' }}>
-              <button className="btn" type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign in'}</button>
+              <button className="btn" type="submit" disabled={loading}>{loading ? t('login.signingIn') : t('login.signIn')}</button>
             </div>
           </form>
         </div>

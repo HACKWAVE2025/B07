@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Header.css';
+import { LanguageContext } from '../context/LanguageContext';
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate(); // move outside of any conditional
   const dropdownRef = useRef();
+  const { t, setLanguage, language } = useContext(LanguageContext);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -48,8 +50,8 @@ const Header = () => {
       </div>
       <div className="header-right">
         <div className="search-container">
-          <input type="text" placeholder="Search schemes..." className="search-input" />
-          <button className="search-button">Search</button>
+          <input type="text" placeholder={t('header.searchPlaceholder')} className="search-input" />
+          <button className="search-button">{t('header.searchButton')}</button>
         </div>
         {user ? (
           <div className="profile-dropdown-wrapper" ref={dropdownRef}>
@@ -67,22 +69,34 @@ const Header = () => {
                   to="#"
                   className="profile-dropdown-item"
                   style={{ padding: '0.75rem 1.5rem', display: 'block', color: '#06038D', borderBottom: '1px solid #eee', textDecoration: 'none', fontWeight: 500 }}
-                  onClick={() => { setDropdownOpen(false); alert('Profile Settings coming soon.'); }}
+                  onClick={() => { setDropdownOpen(false); alert(t('header.profileSettings') + ' coming soon.'); }}
                 >
-                  Profile Settings
+                  {t('header.profileSettings')}
                 </Link>
                 <button
                   className="profile-dropdown-item"
                   style={{ padding: '0.75rem 1.5rem', display: 'block', width: '100%', background: 'none', border: 'none', color: '#FF671F', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
                   onClick={handleLogout}
                 >
-                  Logout
+                  {t('header.logout')}
                 </button>
               </div>
             )}
           </div>
         ) : (
-          <Link to="/login" className="auth-button">Sign In</Link>
+          <>
+            <Link to="/login" className="auth-button">{t('header.signIn')}</Link>
+            <select
+              aria-label="Select language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{ marginLeft: 12, padding: '0.35rem 0.5rem', borderRadius: 6 }}
+            >
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+              <option value="te">తెలుగు</option>
+            </select>
+          </>
         )}
       </div>
     </header>
