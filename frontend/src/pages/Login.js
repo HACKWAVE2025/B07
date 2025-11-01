@@ -29,7 +29,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`/api/users/login`, { email, password });
+      const response = await axios.post(`http://localhost:5000/api/users/login`, { email, password });
 
       const token = response.data?.token || response.data?.accessToken || null;
       if (token) {

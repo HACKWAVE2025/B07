@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 
 //  Run every min
 cron.schedule("* * * * *", async () => {
-  console.log("⏰ Checking reminders...");
 
   const now = new Date();
 
@@ -24,7 +23,6 @@ cron.schedule("* * * * *", async () => {
     reminderDate: { $lte: now },
     isSent: false,
   }).populate("userId schemeId");
-    console.log("Found reminders:", reminders.length);
 
 
   for (const reminder of reminders) {
@@ -46,7 +44,6 @@ cron.schedule("* * * * *", async () => {
       reminder.isSent = true;
       await reminder.save();
 
-      console.log(`✅ Reminder sent for ${reminder.schemeId.title} to ${reminder.userId.email}`);
     } catch (err) {
       console.error("Error sending reminder:", err);
     }

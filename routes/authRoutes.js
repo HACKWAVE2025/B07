@@ -3,21 +3,18 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
+
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
-// ✅ Debug log (remove after confirming it's loaded)
-console.log("✅ JWT_SECRET loaded as:", process.env.JWT_SECRET);
-
-// -------------------- LOGIN --------------------
-console.log("🔐 JWT_SECRET inside authRoutes:", process.env.JWT_SECRET);
-
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
+  
   try {
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
