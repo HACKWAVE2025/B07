@@ -4,11 +4,11 @@ const Scheme = require("../models/Scheme");
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
+
 // Get all schemes
 router.get("/get", async (req, res) => {
   try {
     const schemes = await Scheme.find();
-    console.log(schemes);
     res.status(200).json(schemes);
   } catch (error) {
     console.error("Error fetching schemes:", error);
