@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { LanguageContext } from '../context/LanguageContext';
 // backend base URL (can be configured via env REACT_APP_API_URL)
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Register = () => {
   const [formData, setFormData] = useState({
