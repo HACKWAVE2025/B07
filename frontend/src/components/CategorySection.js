@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import '../styles/CategorySection.css';
 import api from '../utils/api';
+import { LanguageContext } from '../context/LanguageContext';
 import ReminderModal from './ReminderModal';
 
 const categories = [
-  { id: 'central', name: 'Central Schemes', authority: 'central' },
-  { id: 'state', name: 'State Schemes', authority: 'state' },
-  { id: 'private', name: 'Private Schemes', authority: 'private' },
+  { id: 'central', authority: 'central' },
+  { id: 'state', authority: 'state' },
+  { id: 'private', authority: 'private' },
 ];
 
 // Map frontend occupation display names to backend category enum values
@@ -42,6 +43,10 @@ const CategorySection = () => {
   });
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState('');
+  const [error, setError] = useState('');
+  const { t, language } = useContext(LanguageContext);
+
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState(null);
   useEffect(() => {
@@ -54,37 +59,69 @@ const CategorySection = () => {
     try {
       let endpoint = '/schemes/authoritycategory';
       let params = {};
-      
+      let routeLabel = '/api/schemes/get';
+
       // Determine which endpoint to use based on filters
-      if (filters.occupation && filters.occupation !== '') {
-        // Use authoritycategory endpoint when category filter is applied
-        params.authority = filters.category;
-        // Map occupation to backend category enum value
-        params.category = occupationToCategoryMap[filters.occupation] || filters.occupation.toLowerCase();
-      } else {
-        // Use authority endpoint when only authority (and optionally state) is filtered
+      // Frontend "category" maps to backend "authority"
+      // Frontend "occupation" maps to backend "category"
+      
+      const hasAuthority = filters.category && filters.category !== '';
+      const hasState = filters.state && filters.state !== '';
+      const hasOccupation = filters.occupation && filters.occupation !== '';
+
+      if (hasAuthority && (hasOccupation || hasState)) {
+        // Use authoritycategory endpoint when authority + category/state are selected
+        endpoint = '/schemes/authoritycategory';
+        params = {
+          authority: filters.category,
+        };
+        if (hasState) params.state = filters.state;
+        if (hasOccupation) params.category = filters.occupation;
+        
+        const queryString = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
+        routeLabel = `/api/schemes/authoritycategory?${queryString}`;
+      } else if (hasAuthority) {
+        // Use authority endpoint when only authority is selected
         endpoint = '/schemes/authority';
-        params.authority = filters.category;
+        params = {
+          authority: filters.category,
+        };
+        routeLabel = `/api/schemes/authority?authority=${filters.category}`;
+      } else if (hasOccupation && !hasAuthority) {
+        // If only occupation is selected, use category endpoint
+        endpoint = `/schemes/category/${filters.occupation}`;
+        routeLabel = `/api/schemes/category/${filters.occupation}`;
+      } else {
+        // Default: get all schemes
+        endpoint = '/schemes/get';
+        routeLabel = '/api/schemes/get';
+        params = {};
       }
-      
-      // Add state filter if provided
-      if (filters.state && filters.state !== '') {
-        params.state = filters.state;
-      }
-      
-      // Make request and set data
+
+      setCurrentRoute(routeLabel);
+
       const res = await api.get(endpoint, { params });
-      let filtered = res.data || [];
+      
+      // Handle response - backend returns array directly
+      let schemesData = res.data;
+      if (!Array.isArray(schemesData)) {
+        schemesData = [];
+      }
       
       // Apply search filter on client side
-      if (filters.search) {
-        filtered = filtered.filter(s => s.name?.toLowerCase().includes(filters.search.toLowerCase()));
+      let filtered = schemesData;
+      if (filters.search && filters.search.trim() !== '') {
+        filtered = schemesData.filter(s => 
+          s.name?.toLowerCase().includes(filters.search.toLowerCase())
+        );
       }
       
       setSchemes(filtered);
+      setError('');
     } catch (e) {
       console.error('Error fetching schemes:', e);
       setSchemes([]);
+      setError(e.response?.data?.message || e.message || 'Failed to fetch schemes. Please check your backend connection.');
     } finally {
       setLoading(false);
     }
@@ -92,7 +129,6 @@ const CategorySection = () => {
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => {
-      // Reset dependent filters as appropriate
       if (field === 'category') {
         return { ...prev, category: value, occupation: '', state: '', search: '' };
       }
@@ -154,7 +190,7 @@ const CategorySection = () => {
       <aside className="category-sidebar">
         <h2>Filters</h2>
         <div className="filter-group">
-          <label>Scheme Category</label>
+          <label>{t('category.schemeCategory')}</label>
           <div className="filter-btns-vertical">
             {categories.map(c => (
               <button
@@ -162,73 +198,98 @@ const CategorySection = () => {
                 className={`side-category-btn${filters.category === c.id ? ' active' : ''}`}
                 onClick={() => handleFilterChange('category', c.id)}
               >
-                {c.name}
+                {t(`category.${c.id}`)}
               </button>
             ))}
           </div>
         </div>
         <div className="filter-group">
-          <label>Occupation</label>
+          <label>{t('category.occupation')}</label>
           <select
             value={filters.occupation}
             onChange={e => handleFilterChange('occupation', e.target.value)}
             disabled={!filters.category}
           >
-            <option value="">All</option>
+            <option value="">{t('category.all')}</option>
             {(occupations[filters.category] || []).map(o => (
               <option key={o} value={o}>{o}</option>
             ))}
           </select>
         </div>
         <div className="filter-group">
-          <label>State</label>
+          <label>{t('category.stateLabel')}</label>
           <select value={filters.state} onChange={e => handleFilterChange('state', e.target.value)}>
-            <option value="">All States</option>
+            <option value="">{t('category.allStates')}</option>
             {states.map(state => (
               state && <option key={state} value={state}>{state}</option>
             ))}
           </select>
         </div>
         <div className="filter-group">
-          <label>Search by name</label>
+          <label>{t('category.searchByName')}</label>
           <input
             type="text"
             value={filters.search}
             onChange={e => handleFilterChange('search', e.target.value)}
-            placeholder="Ex: Kisan..."
+            placeholder={t('category.searchPlaceholderExample')}
           />
         </div>
       </aside>
       <main className="scheme-results-area">
-        <h2 className="results-title">Schemes</h2>
+        <div style={{marginBottom: '1rem'}}>
+          <span style={{fontSize: '0.96rem', color: '#666'}}>{t('category.routeUsed')}: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
+        </div>
+        <h2 className="results-title">{t('category.schemes')}</h2>
+        {error && (
+          <div style={{padding: '1rem', background: '#fff0f0', border: '1px solid #f5c2c2', borderRadius: '6px', color: '#a00', marginBottom: '1rem'}}>
+            {error}
+          </div>
+        )}
         {loading ? (
-          <div>Loading schemes...</div>
+          <div style={{padding: '2rem', textAlign: 'center'}}>{t('category.loading')}</div>
         ) : schemes.length === 0 ? (
-          <div>No schemes match your filters.</div>
+          <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
+            {t('category.noMatchingSchemes')}
+            {!loading && <div style={{marginTop: '0.5rem', fontSize: '0.9rem'}}>{t('category.adjustFilters')}</div>}
+          </div>
         ) : (
           <div className="schemes-list">
-            {schemes.map(scheme => (
-              <div className="scheme-card" key={scheme._id || scheme.id}>
-                <button 
-                  className="scheme-bell-icon" 
-                  onClick={(e) => handleBellClick(e, scheme)}
-                  title="Set Reminder"
-                >
-                  🔔
-                </button>
-                <h3 
-                  onClick={() => handleSchemeNameClick(scheme)}
-                  className={scheme.applyLink ? 'scheme-name-link' : ''}
-                  title={scheme.applyLink ? 'Click to open application link' : ''}
-                >
-                  {scheme.name}
-                </h3>
-                <p><b>Category:</b> {scheme.category || 'N/A'}</p>
-                <p><b>State:</b> {scheme.state || 'All'}</p>
-                <p><b>Authority:</b> {scheme.authority || 'N/A'}</p>
-                <p className="scheme-description">{scheme.description || 'No description.'}</p>
-              </div>
-            ))}
+            {schemes.map(scheme => {
+              const schemeName = (language === 'hi' && (scheme.name_hi || scheme.name_hindi)) 
+                ? (scheme.name_hi || scheme.name_hindi) 
+                : (language === 'te' && scheme.name_te) 
+                  ? scheme.name_te 
+                  : (scheme.name || scheme.title);
+
+              const schemeDescription = (language === 'hi' && (scheme.description_hi || scheme.description_hindi))
+                ? (scheme.description_hi || scheme.description_hindi)
+                : (language === 'te' && scheme.description_te)
+                  ? scheme.description_te
+                  : (scheme.description || t('category.noDescription'));
+
+              return (
+                <div className="scheme-card" key={scheme._id || scheme.id}>
+                  <h3 
+                    onClick={() => handleSchemeNameClick(scheme)}
+                    className={scheme.applyLink ? 'scheme-name-link' : ''}
+                    title={scheme.applyLink ? t('category.clickToApply') : ''}
+                  >
+                    {schemeName}
+                  </h3>
+                  <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation || t('category.notAvailable')}</p>
+                  <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
+                  <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category || t('category.notAvailable')}</p>
+                  <p className="scheme-description">{schemeDescription}</p>
+                  <button 
+                    className="scheme-bell-icon" 
+                    onClick={(e) => handleBellClick(e, scheme)}
+                    title={t('category.setReminder')}
+                  >
+                    🔔
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </main>

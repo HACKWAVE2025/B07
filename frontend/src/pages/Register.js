@@ -1,7 +1,8 @@
 //Register.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { LanguageContext } from '../context/LanguageContext';
 // backend base URL (can be configured via env REACT_APP_API_URL)
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -21,6 +22,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useContext(LanguageContext);
 
   const { 
     name, email, password, confirmPassword, 
@@ -87,14 +89,14 @@ const Register = () => {
     <div className="container section">
       <div className="container" style={{ maxWidth: 800, margin: '0 auto' }}>
         <div className="section-title">
-          <h2>Create a new account</h2>
+          <h2>{t('register.title')}</h2>
         </div>
 
         <div className="auth-card">
           <p style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            Already have an account?{' '}
+            {t('register.alreadyHave')}{' '}
             <Link to="/login" className="btn-secondary" style={{ padding: '0.25rem 0.6rem', borderRadius: 4 }}>
-              Sign in here
+              {t('register.signInHere')}
             </Link>
           </p>
 
@@ -107,27 +109,27 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
-                <label>Full Name *</label>
+                <label>{t('register.fullName')} *</label>
                 <input name="name" value={name} onChange={handleChange} required />
               </div>
 
               <div>
-                <label>Email address *</label>
+                <label>{t('register.email')} *</label>
                 <input name="email" type="email" value={email} onChange={handleChange} required />
               </div>
 
               <div>
-                <label>Password *</label>
+                <label>{t('register.password')} *</label>
                 <input name="password" type="password" minLength={6} value={password} onChange={handleChange} required />
               </div>
 
               <div>
-                <label>Confirm Password *</label>
+                <label>{t('register.confirmPassword')} *</label>
                 <input name="confirmPassword" type="password" minLength={6} value={confirmPassword} onChange={handleChange} required />
               </div>
 
               <div>
-                <label>Occupation *</label>
+                <label>{t('register.occupation')} *</label>
                 <select name="occupation" value={occupation} onChange={handleChange} required>
                   <option value="">Select Occupation</option>
                   <option value="student">Student</option>
@@ -139,12 +141,12 @@ const Register = () => {
               </div>
 
               <div>
-                <label>Annual Income (INR)</label>
+                <label>{t('register.annualIncome')}</label>
                 <input name="income" type="number" value={income} onChange={handleChange} />
               </div>
 
               <div>
-                <label>State *</label>
+                <label>{t('register.state')} *</label>
                 <select name="state" value={state} onChange={handleChange} required>
                   <option value="">Select State</option>
                   <option value="Andhra Pradesh">Andhra Pradesh</option>
@@ -159,12 +161,12 @@ const Register = () => {
               </div>
 
               <div>
-                <label>Age *</label>
+                <label>{t('register.age')} *</label>
                 <input name="age" type="number" min={18} max={120} value={age} onChange={handleChange} required />
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label>Gender *</label>
+                <label>{t('register.gender')} *</label>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
                   <label><input type="radio" name="gender" value="male" checked={gender === 'male'} onChange={handleChange} required /> Male</label>
                   <label><input type="radio" name="gender" value="female" checked={gender === 'female'} onChange={handleChange} /> Female</label>
@@ -173,7 +175,7 @@ const Register = () => {
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label>Caste Category</label>
+                <label>{t('register.caste')}</label>
                 <select name="caste" value={caste} onChange={handleChange}>
                   <option value="">Select Caste Category</option>
                   <option value="OC">OC</option>
@@ -206,7 +208,7 @@ const Register = () => {
       fontSize: '14px',
     }}
   >
-    I agree to the <a href="#">Terms and Conditions</a>
+    {t('register.terms')}
   </label>
 </div>
 
@@ -217,7 +219,7 @@ const Register = () => {
 
 
             <div style={{ marginTop: '1rem' }}>
-              <button className="btn" type="submit" disabled={loading}>{loading ? 'Creating Account...' : 'Create Account'}</button>
+              <button className="btn" type="submit" disabled={loading}>{loading ? t('register.creating') : t('register.createAccountBtn')}</button>
             </div>
           </form>
         </div>

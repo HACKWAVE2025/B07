@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Header.css';
+import { LanguageContext } from '../context/LanguageContext';
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -8,6 +9,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef();
+  const { t, setLanguage, language } = useContext(LanguageContext);
 
   // Check for user on mount and when route changes (e.g., after login)
   useEffect(() => {
@@ -59,38 +61,63 @@ const Header = () => {
       </div>
       <div className="header-right">
         <div className="search-container">
-          <input type="text" placeholder={('search_placeholder')} className="search-input" />
-          <button className="search-button">{('search_button')}</button>
+          <input type="text" placeholder={t('header.searchPlaceholder')} className="search-input" />
+          <button className="search-button">{t('header.searchButton')}</button>
         </div>
         {user ? (
-          <div className="profile-dropdown-wrapper" ref={dropdownRef}>
-            <button
-              className="profile-trigger"
-              onClick={() => setDropdownOpen((open) => !open)}
+          <div className="user-section">
+            <select
+              aria-label="Select language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{ marginRight: 12, padding: '0.35rem 0.5rem', borderRadius: 6 }}
             >
-              {user.name ? user.name.split(' ')[0] : user.email}
-              <span className="dropdown-arrow">▼</span>
-            </button>
-            {dropdownOpen && (
-              <div className="profile-dropdown">
-                <Link
-                  to="#"
-                  className="profile-dropdown-item"
-                  onClick={() => { setDropdownOpen(false); alert('Profile Settings coming soon.'); }}
-                >
-                  Profile Settings
-                </Link>
-                <button
-                  className="profile-dropdown-item"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+              <option value="te">తెలుగు</option>
+            </select>
+            <div className="profile-dropdown-wrapper" ref={dropdownRef}>
+              <button
+                className="profile-trigger"
+                onClick={() => setDropdownOpen((open) => !open)}
+              >
+                {user.name ? user.name.split(' ')[0] : user.email}
+                <span className="dropdown-arrow">▼</span>
+              </button>
+              {dropdownOpen && (
+                <div className="profile-dropdown">
+                  <Link
+                    to="#"
+                    className="profile-dropdown-item"
+                    style={{ padding: '0.75rem 1.5rem', display: 'block', color: '#06038D', borderBottom: '1px solid #eee', textDecoration: 'none', fontWeight: 500 }}
+                    onClick={() => { setDropdownOpen(false); alert(t('header.profileSettings') + ' coming soon.'); }}
+                  >
+                    {t('header.profileSettings')}
+                  </Link>
+                  <button
+                    className="profile-dropdown-item"
+                    onClick={handleLogout}
+                  >
+                    {t('header.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
-          <Link to="/login" className="auth-button">Sign In</Link>
+          <div className="auth-section">
+            <Link to="/login" className="auth-button">{t('header.signIn')}</Link>
+            <select
+              aria-label="Select language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{ marginLeft: 12, padding: '0.35rem 0.5rem', borderRadius: 6 }}
+            >
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+              <option value="te">తెలుగు</option>
+            </select>
+          </div>
         )}
       </div>
     </header>
