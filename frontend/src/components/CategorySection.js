@@ -34,21 +34,44 @@ const states = [
   '', 'Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu', 'Kerala', 'Maharashtra', 'Delhi'
 ];
 
+const castes = [
+  '', 'OC', 'OBC', 'SC', 'ST'
+];
+
 const CategorySection = () => {
   const [filters, setFilters] = useState({
     category: 'central',
     occupation: '',
     state: '',
+    caste: '',
     search: ''
   });
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentRoute, setCurrentRoute] = useState('');
   const [error, setError] = useState('');
   const { t, language } = useContext(LanguageContext);
 
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState(null);
+  
+  // Check for search query from navigation state (from header search)
+  useEffect(() => {
+    const locationState = window.history.state?.usr;
+    if (locationState && locationState.searchQuery) {
+      // When searching from header, fetch all schemes first
+      setFilters(prev => ({
+        ...prev,
+        category: '',
+        occupation: '',
+        state: '',
+        caste: '',
+        search: locationState.searchQuery
+      }));
+      // Clear the state to prevent repeated application
+      window.history.replaceState({ ...window.history.state, usr: null }, '');
+    }
+  }, []);
+
   useEffect(() => {
     fetchSchemes();
     // eslint-disable-next-line
@@ -56,49 +79,60 @@ const CategorySection = () => {
 
   const fetchSchemes = async () => {
     setLoading(true);
+    setError('');
     try {
-      let endpoint = '/schemes/authoritycategory';
+      let endpoint = '/schemes/get';
       let params = {};
-      let routeLabel = '/api/schemes/get';
 
       // Determine which endpoint to use based on filters
       // Frontend "category" maps to backend "authority"
-      // Frontend "occupation" maps to backend "category"
+      // Frontend "occupation" needs to be mapped to backend "category" enum values
       
       const hasAuthority = filters.category && filters.category !== '';
       const hasState = filters.state && filters.state !== '';
       const hasOccupation = filters.occupation && filters.occupation !== '';
+      const hasCaste = filters.caste && filters.caste !== '';
+      const hasSearch = filters.search && filters.search.trim() !== '';
 
-      if (hasAuthority && (hasOccupation || hasState)) {
-        // Use authoritycategory endpoint when authority + category/state are selected
-        endpoint = '/schemes/authoritycategory';
-        params = {
-          authority: filters.category,
-        };
-        if (hasState) params.state = filters.state;
-        if (hasOccupation) params.category = filters.occupation;
-        
-        const queryString = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
-        routeLabel = `/api/schemes/authoritycategory?${queryString}`;
-      } else if (hasAuthority) {
-        // Use authority endpoint when only authority is selected
-        endpoint = '/schemes/authority';
-        params = {
-          authority: filters.category,
-        };
-        routeLabel = `/api/schemes/authority?authority=${filters.category}`;
-      } else if (hasOccupation && !hasAuthority) {
-        // If only occupation is selected, use category endpoint
-        endpoint = `/schemes/category/${filters.occupation}`;
-        routeLabel = `/api/schemes/category/${filters.occupation}`;
-      } else {
-        // Default: get all schemes
-        endpoint = '/schemes/get';
-        routeLabel = '/api/schemes/get';
+      // If only caste is selected, use caste endpoint
+      if (hasCaste && !hasAuthority && !hasOccupation && !hasState) {
+        endpoint = `/schemes/caste/${filters.caste}`;
         params = {};
-      }
+      } else if (hasSearch && !hasAuthority && !hasOccupation && !hasState && !hasCaste) {
+        // If search query exists, fetch all schemes from database to search across everything
+        endpoint = '/schemes/get';
+        params = {};
+      } else {
+        // Map occupation to backend category enum value if occupation is selected
+        const mappedCategory = hasOccupation 
+          ? (occupationToCategoryMap[filters.occupation] || filters.occupation.toLowerCase())
+          : null;
 
-      setCurrentRoute(routeLabel);
+        if (hasAuthority && (mappedCategory || hasState)) {
+          // Use authoritycategory endpoint when authority + category/state are selected
+          endpoint = '/schemes/authoritycategory';
+          params = {
+            authority: filters.category,
+          };
+          if (hasState) params.state = filters.state;
+          if (mappedCategory) params.category = mappedCategory;
+        } else if (hasAuthority) {
+          // Use authority endpoint when only authority is selected
+          endpoint = '/schemes/authority';
+          params = {
+            authority: filters.category,
+          };
+          if (hasState) params.state = filters.state;
+        } else if (mappedCategory && !hasAuthority) {
+          // If only occupation is selected, use category endpoint with mapped value
+          endpoint = `/schemes/category/${mappedCategory}`;
+          params = {};
+        } else {
+          // Default: get all schemes
+          endpoint = '/schemes/get';
+          params = {};
+        }
+      }
 
       const res = await api.get(endpoint, { params });
       
@@ -108,12 +142,28 @@ const CategorySection = () => {
         schemesData = [];
       }
       
-      // Apply search filter on client side
+      // Apply search and caste filter on client side if not already filtered by backend
       let filtered = schemesData;
+      
+      // Filter by caste if not already filtered by backend endpoint
+      if (hasCaste && endpoint !== `/schemes/caste/${filters.caste}`) {
+        filtered = schemesData.filter(s => {
+          const schemeCaste = s.eligibilityCriteria?.caste || s.caste || '';
+          return schemeCaste.toUpperCase() === filters.caste.toUpperCase();
+        });
+      }
+      
+      // Apply search filter
       if (filters.search && filters.search.trim() !== '') {
-        filtered = schemesData.filter(s => 
-          s.name?.toLowerCase().includes(filters.search.toLowerCase())
-        );
+        const searchLower = filters.search.toLowerCase();
+        filtered = filtered.filter(s => {
+          const name = (s.name || '').toLowerCase();
+          const description = (s.description || '').toLowerCase();
+          const category = (s.category || '').toLowerCase();
+          return name.includes(searchLower) || 
+                 description.includes(searchLower) || 
+                 category.includes(searchLower);
+        });
       }
       
       setSchemes(filtered);
@@ -130,13 +180,16 @@ const CategorySection = () => {
   const handleFilterChange = (field, value) => {
     setFilters(prev => {
       if (field === 'category') {
-        return { ...prev, category: value, occupation: '', state: '', search: '' };
+        return { ...prev, category: value, occupation: '', state: '', caste: '', search: '' };
       }
       if (field === 'occupation') {
         return { ...prev, occupation: value };
       }
       if (field === 'state') {
         return { ...prev, state: value };
+      }
+      if (field === 'caste') {
+        return { ...prev, caste: value };
       }
       if (field === 'search') {
         return { ...prev, search: value };
@@ -188,7 +241,7 @@ const CategorySection = () => {
   return (
     <section className="category-explorer-main">
       <aside className="category-sidebar">
-        <h2>Filters</h2>
+        <h2>{t('category.filters')}</h2>
         <div className="filter-group">
           <label>{t('category.schemeCategory')}</label>
           <div className="filter-btns-vertical">
@@ -226,6 +279,15 @@ const CategorySection = () => {
           </select>
         </div>
         <div className="filter-group">
+          <label>{t('category.casteLabel')}</label>
+          <select value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
+            <option value="">{t('category.allCastes')}</option>
+            {castes.map(caste => (
+              caste && <option key={caste} value={caste}>{caste}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-group">
           <label>{t('category.searchByName')}</label>
           <input
             type="text"
@@ -236,9 +298,6 @@ const CategorySection = () => {
         </div>
       </aside>
       <main className="scheme-results-area">
-        <div style={{marginBottom: '1rem'}}>
-          <span style={{fontSize: '0.96rem', color: '#666'}}>{t('category.routeUsed')}: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
-        </div>
         <h2 className="results-title">{t('category.schemes')}</h2>
         {error && (
           <div style={{padding: '1rem', background: '#fff0f0', border: '1px solid #f5c2c2', borderRadius: '6px', color: '#a00', marginBottom: '1rem'}}>

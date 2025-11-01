@@ -199,6 +199,40 @@ select, .filter-group input[type="text"] {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
   gap: 1.2rem;
+  /* Max height for 6 schemes in 2 rows (3 columns) */
+  /* Card min-height: 205px + content, gap: 1.2rem */
+  /* Calculation: 2 rows × ~260px (allowing for content) + 1 gap */
+  max-height: calc(2 * 260px + 1.2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+/* Scrollbar styling similar to filter inputs */
+.schemes-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.schemes-list::-webkit-scrollbar-track {
+  background: #fcfcfc;
+  border-radius: 10px;
+}
+
+.schemes-list::-webkit-scrollbar-thumb {
+  background: #d4d9df;
+  border-radius: 10px;
+  border: 1px solid #fcfcfc;
+}
+
+.schemes-list::-webkit-scrollbar-thumb:hover {
+  background: #c4c9cf;
+}
+
+/* Firefox scrollbar */
+.schemes-list {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d9df #fcfcfc;
 }
 .scheme-card {
   background: #fff6ee;
