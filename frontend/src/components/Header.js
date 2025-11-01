@@ -1,9 +1,42 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Header.css';
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate(); // move outside of any conditional
+  const dropdownRef = useRef();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const currentUser = localStorage.getItem('currentUser');
+    if (token && currentUser) {
+      setUser(JSON.parse(currentUser));
+    } else {
+      setUser(null);
+    }
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    setUser(null);
+    setDropdownOpen(false);
+    navigate('/');
+    window.location.reload(); // Ensures state resets for full logout
+  };
 
   return (
     <header className="header">
@@ -18,8 +51,36 @@ const Header = () => {
           <input type="text" placeholder="Search schemes..." className="search-input" />
           <button className="search-button">Search</button>
         </div>
-        {isLoggedIn ? (
-          <button className="auth-button" onClick={() => setIsLoggedIn(false)}>Logout</button>
+        {user ? (
+          <div className="profile-dropdown-wrapper" ref={dropdownRef}>
+            <button
+              className="profile-trigger"
+              onClick={() => setDropdownOpen((open) => !open)}
+              style={{ padding: '0.5rem 1.5rem', background: 'transparent', border: '2px solid #FF671F', borderRadius: 4, cursor: 'pointer', fontWeight: 600 }}
+            >
+              {user.name ? user.name.split(' ')[0] : user.email}
+              <span style={{ marginLeft: 8 }}>▼</span>
+            </button>
+            {dropdownOpen && (
+              <div className="profile-dropdown" style={{ position: 'absolute', background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,0.18)', minWidth: 160, right: 0, zIndex: 10, borderRadius: 6 }}>
+                <Link
+                  to="#"
+                  className="profile-dropdown-item"
+                  style={{ padding: '0.75rem 1.5rem', display: 'block', color: '#06038D', borderBottom: '1px solid #eee', textDecoration: 'none', fontWeight: 500 }}
+                  onClick={() => { setDropdownOpen(false); alert('Profile Settings coming soon.'); }}
+                >
+                  Profile Settings
+                </Link>
+                <button
+                  className="profile-dropdown-item"
+                  style={{ padding: '0.75rem 1.5rem', display: 'block', width: '100%', background: 'none', border: 'none', color: '#FF671F', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link to="/login" className="auth-button">Sign In</Link>
         )}
