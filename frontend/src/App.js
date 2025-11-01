@@ -1,10 +1,11 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Carousel from './components/Carousel';
-import CategorySection from './components/CategorySection';
-import AboutSection from './components/AboutSection';
-import FAQSection from './components/FAQSection';
 import Footer from './components/Footer';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 function App() {
@@ -12,12 +13,12 @@ function App() {
     <div className="app">
       <Header />
       <main>
-        <section className="carousel-section">
-          <Carousel />
-        </section>
-        <CategorySection />
-        <AboutSection />
-        <FAQSection />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
       </main>
       <Footer />
     </div>

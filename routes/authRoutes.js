@@ -1,12 +1,19 @@
-const User = require("../models/user");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const User = require("../models/user");
+const path = require("path");
+
 const router = express.Router();
 router.use(express.json());
-router.use(express.urlencoded({extended: true}));
+router.use(express.urlencoded({ extended: true }));
 
-// inside your login route
+// ✅ Debug log (remove after confirming it's loaded)
+console.log("✅ JWT_SECRET loaded as:", process.env.JWT_SECRET);
+
+// -------------------- LOGIN --------------------
+console.log("🔐 JWT_SECRET inside authRoutes:", process.env.JWT_SECRET);
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -18,15 +25,14 @@ router.post("/login", async (req, res) => {
     const isMatch = await user.matchPassword(password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
-    
-    // Create JWT
+
+    // ✅ Create JWT securely
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
-    // Respond with token
     res.status(200).json({
       message: "Login successful",
       token,
@@ -37,13 +43,24 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-// Register User API
+// -------------------- REGISTER --------------------
 router.post("/register", async (req, res) => {
-  const { name, email, occupation, password, income, state, age, gender, caste } = req.body;
+  const {
+    name,
+    email,
+    occupation,
+    password,
+    income,
+    state,
+    age,
+    gender,
+    caste,
+  } = req.body;
 
   try {
     // check if user already exists
@@ -57,7 +74,7 @@ router.post("/register", async (req, res) => {
       name,
       email,
       occupation,
-      password, // will be hashed automatically by pre-save middleware
+      password, // hashed automatically by pre-save middleware
       income,
       state,
       age,
@@ -77,7 +94,7 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("Registration error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
