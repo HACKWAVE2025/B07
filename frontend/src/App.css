@@ -86,21 +86,22 @@ button {
 .btn {
   display: inline-block;
   padding: 0.8rem 1.8rem;
-  background-color: var(--primary-color);
+  /* Brighter blue for buttons to make them stand out */
+  background-color: #0b63ff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
   cursor: pointer;
 }
 
 .btn:hover {
-  background-color: #05026e;
+  background-color: #084acc;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 18px rgba(9, 30, 66, 0.12);
 }
 
 .btn-secondary {
@@ -109,6 +110,46 @@ button {
 
 .btn-secondary:hover {
   background-color: #e05a1a;
+}
+
+/* Authentication card for sign-in / register pages */
+.auth-card {
+  background: #fff6ee; /* light orange */
+  border: 1px solid rgba(255,103,31,0.12);
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(6, 3, 141, 0.06);
+}
+
+.auth-card h2 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.auth-card p {
+  margin-bottom: 0.75rem;
+}
+
+.auth-card label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.auth-card input,
+.auth-card select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  outline: none;
+}
+
+.auth-card input:focus,
+.auth-card select:focus {
+  border-color: #0b63ff;
+  box-shadow: 0 4px 12px rgba(11,99,255,0.08);
 }
 
 /* Responsive Design */

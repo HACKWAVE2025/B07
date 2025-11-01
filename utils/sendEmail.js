@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 
 //  Setup mail transporter (using Gmail as example)
 const transporter = nodemailer.createTransport({
-  service:process.env.EMAIL_SERVICE,
+  service:"gmail",
   auth: {
     user: process.env.EMAIL_USER, // your email
     pass: process.env.EMAIL_PASS, // your app password
@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 
 //  Run every min
 cron.schedule("* * * * *", async () => {
-  console.log("⏰ Checking reminders...");
 
   const now = new Date();
 
@@ -25,11 +24,14 @@ cron.schedule("* * * * *", async () => {
     isSent: false,
   }).populate("userId schemeId");
 
+
   for (const reminder of reminders) {
     try {
-      if (reminder.type ===process.env.EMAIL_SERVICE) {
+      if (reminder.type ==="email") {
         const userEmail = reminder.userId.email;
-        const schemeTitle = reminder.schemeId.title;
+        const schemeId = reminder.schemeId;
+        const schemeTitle = await Scheme.findById(schemeId).select("name");
+
 
         await transporter.sendMail({
           from: process.env.EMAIL_USER,
@@ -42,7 +44,6 @@ cron.schedule("* * * * *", async () => {
       reminder.isSent = true;
       await reminder.save();
 
-      console.log(`✅ Reminder sent for ${reminder.schemeId.title} to ${reminder.userId.email}`);
     } catch (err) {
       console.error("Error sending reminder:", err);
     }
