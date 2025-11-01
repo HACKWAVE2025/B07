@@ -15,8 +15,8 @@ const Header = () => {
       </div>
       <div className="header-right">
         <div className="search-container">
-          <input type="text" placeholder="Search schemes..." className="search-input" />
-          <button className="search-button">Search</button>
+          <input type="text" placeholder={('search_placeholder')} className="search-input" />
+          <button className="search-button">{('search_button')}</button>
         </div>
         {isLoggedIn ? (
           <button className="auth-button" onClick={() => setIsLoggedIn(false)}>Logout</button>

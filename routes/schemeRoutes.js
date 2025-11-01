@@ -67,4 +67,21 @@ router.get("/category/:category", async (req, res) => {
   }
 });
 
+router.get("/caste/:caste",async(req,res)=>{
+  try{
+    const caste = req.params.caste.toUpperCase();
+    const schemes = await Scheme.find({caste});
+
+    if(!schemes || schemes.length === 0){ 
+      return res.status(404).json({message:"No schemes found for this caste"});
+    }
+    res.status(200).json(schemes);
+  }
+  catch(error){
+    console.error("Error fetching schemes by category:", error);
+    res.status(500).json({ message: "Server error while fetching schemes" });
+  }
+});
+
 module.exports = router;
+
