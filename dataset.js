@@ -281,12 +281,88 @@ connectDB().then(async () => {
             }
         ];
 
+
+
+
+
+
+    //     const updates = [
+    //   { name: "Pradhan Mantri Jan Dhan Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Ayushman Bharat – Pradhan Mantri Jan Arogya Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Pradhan Mantri Awas Yojana (Gramin)", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Startup India", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Stand Up India", cast: ["SC","ST"] },
+    //   { name: "Pradhan Mantri MUDRA Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Pradhan Mantri Fasal Bima Yojana", cast: ["SC","ST","OBC","General"] },
+    // ];
+
+
+    // const updates = [
+    //   { name: "Atal Pension Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Atal Bhujal Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "One Nation-One Ration Card Scheme", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Pradhan Mantri Surya Ghar Muft Bijli Yojana", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Pradhan Mantri Kaushal Vikas Yojana (PMKVY)", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Beti Bachao Beti Padhao", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Production Linked Incentive (PLI) Scheme", cast: ["SC","ST","OBC","General"] },
+    //   { name: "Atmanirbhar Bharat Rojgar Yojana", cast: ["SC","ST","OBC","General"] }
+    // ];
+
+
+
+
+    const updates = [
+      // Telangana
+      { name: "Rythu Bandhu Scheme", cast: ["SC","ST","OBC","General"] },
+      { name: "Dalit Bandhu", cast: ["SC"] }, // SC specific
+      { name: "Aasara Pension Scheme", cast: ["SC","ST","OBC","General"] },
+      { name: "Gruha Jyothi / Solar Rooftop Support (Telangana)", cast: ["SC","ST","OBC","General"] },
+      { name: "Rajiv Yuva Vikasam", cast: ["SC","ST","OBC","General"] },
+
+      // Andhra Pradesh
+      { name: "YSR Rythu Bharosa", cast: ["SC","ST","OBC","General"] },
+      { name: "Amma Vodi", cast: ["SC","ST","OBC","General"] },
+      { name: "Jagananna Gorumudda / Nutritional Support Program", cast: ["SC","ST","OBC","General"] },
+      { name: "Pedalandariki Illu", cast: ["SC","ST","OBC","General"] },
+      { name: "YSR Free Crop Insurance", cast: ["SC","ST","OBC","General"] },
+
+      // Tamil Nadu
+      { name: "Kalaignar Magalir Urimai Thogai", cast: ["SC","ST","OBC","General"] },
+      { name: "Pudhumai Penn", cast: ["SC","ST","OBC","General"] },
+      { name: "Amma Two Wheeler Scheme for Working Women", cast: ["SC","ST","OBC","General"] },
+      { name: "Kudimaramathu Scheme", cast: ["SC","ST","OBC","General"] },
+
+      // Gujarat
+      { name: "Namo Lakshmi Yojana", cast: ["SC","ST","OBC","General"] },
+      { name: "Vahli Dikri Yojana", cast: ["SC","ST","OBC","General"] },
+      { name: "Mukhyamantri Kisan Sahay Yojana", cast: ["SC","ST","OBC","General"] },
+      { name: "Mukhyamantri Mahila Kisan Sashaktikaran Yojana", cast: ["SC","ST","OBC","General"] },
+
+      // Maharashtra
+      { name: "Mukhyamantri Saur Krushi Pump Yojana", cast: ["SC","ST","OBC","General"] },
+      { name: "Majhi Kanya Bhagyashree / Mamhi Kanya", cast: ["SC","ST","OBC","General"] },
+      { name: "UMED (Maharashtra State Rural Livelihoods Mission)", cast: ["SC","ST","OBC","General"] },
+      { name: "Mahatma Jyotirao Phule Jan Arogya Yojana (State Health Support)", cast: ["SC","ST","OBC","General"] }
+    ];
+
+
+
+    for (const scheme of updates) {
+      await Scheme.updateOne(
+        { name: scheme.name },
+        { $set: { "eligibilityCriteria.cast": scheme.cast } }
+      );
+      console.log(`Updated cast for: ${scheme.name}`);
+    }
+
+    console.log("All central schemes updated successfully!");
+
         const stateData = require("./statedata.js");
 
         // const result = await Scheme.insertMany(moreCentralSchemes);
-        const result = await Scheme.insertMany(stateData);
+        // const result = await Scheme.insertMany(stateData);
 
-        console.log("successfull");
+        // console.log("successfull");
 
 
         process.exit();

@@ -20,6 +20,7 @@ const schemeSchema = new mongoose.Schema({
     occupation: [{ type: String }], // e.g. ["student", "farmer"]
     incomeLimit: { type: Number },
     gender: [{ type: String }], // optional
+    cast: [{ type: String }], 
   },
   deadline: { type: Date },
   applyLink: { type: String },
