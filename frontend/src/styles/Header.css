@@ -103,6 +103,16 @@ a.auth-button {
   cursor: pointer;
   font-weight: 600;
   color: #191919;
+  transition: all 0.3s;
+}
+
+.profile-trigger:hover {
+  background-color: #FF671F;
+  color: white;
+}
+
+.dropdown-arrow {
+  margin-left: 8px;
 }
 
 .profile-dropdown {

@@ -2,12 +2,27 @@ import React, { useState, useEffect, useContext } from 'react';
 import '../styles/CategorySection.css';
 import api from '../utils/api';
 import { LanguageContext } from '../context/LanguageContext';
+import ReminderModal from './ReminderModal';
 
 const categories = [
   { id: 'central', authority: 'central' },
   { id: 'state', authority: 'state' },
   { id: 'private', authority: 'private' },
 ];
+
+// Map frontend occupation display names to backend category enum values
+const occupationToCategoryMap = {
+  'Student': 'student',
+  'Farmer': 'farmer',
+  'Business': 'business',
+  'Senior Citizen': 'welfare',
+  'Women': 'women',
+  'Startup': 'startup',
+  'Small Business': 'business',
+  'Women Entrepreneur': 'women',
+  'Professional': 'other',
+  'Unemployed': 'welfare'
+};
 
 const occupations = {
   central: ['Student', 'Farmer', 'Business', 'Senior Citizen', 'Women'],
@@ -32,6 +47,8 @@ const CategorySection = () => {
   const [error, setError] = useState('');
   const { t, language } = useContext(LanguageContext);
 
+  const [reminderModalOpen, setReminderModalOpen] = useState(false);
+  const [selectedScheme, setSelectedScheme] = useState(null);
   useEffect(() => {
     fetchSchemes();
     // eslint-disable-next-line
@@ -40,7 +57,7 @@ const CategorySection = () => {
   const fetchSchemes = async () => {
     setLoading(true);
     try {
-      let endpoint = '/schemes/get';
+      let endpoint = '/schemes/authoritycategory';
       let params = {};
       let routeLabel = '/api/schemes/get';
 
@@ -128,6 +145,46 @@ const CategorySection = () => {
     });
   };
 
+  const handleBellClick = (e, scheme) => {
+    e.stopPropagation();
+    // Check if user is logged in
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('Please login to set reminders.');
+      return;
+    }
+    setSelectedScheme(scheme);
+    setReminderModalOpen(true);
+  };
+
+  const handleCreateReminder = async (reminderDate) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || !currentUser.id) {
+      throw new Error('User not found. Please login again.');
+    }
+
+    try {
+      const reminderData = {
+        userId: currentUser.id,
+        schemeId: selectedScheme._id || selectedScheme.id,
+        type: 'email',
+        reminderDate: reminderDate
+      };
+
+      const response = await api.post('/reminders/create', reminderData);
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to create reminder';
+      throw new Error(errorMessage);
+    }
+  };
+
+  const handleSchemeNameClick = (scheme) => {
+    if (scheme.applyLink) {
+      window.open(scheme.applyLink, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <section className="category-explorer-main">
       <aside className="category-sidebar">
@@ -189,26 +246,62 @@ const CategorySection = () => {
           </div>
         )}
         {loading ? (
-          <div style={{padding: '2rem', textAlign: 'center'}}>Loading schemes...</div>
+          <div style={{padding: '2rem', textAlign: 'center'}}>{t('category.loading')}</div>
         ) : schemes.length === 0 ? (
           <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
-            No schemes match your filters.
-            {!loading && <div style={{marginTop: '0.5rem', fontSize: '0.9rem'}}>Try adjusting your filters or check if the backend is running.</div>}
+            {t('category.noMatchingSchemes')}
+            {!loading && <div style={{marginTop: '0.5rem', fontSize: '0.9rem'}}>{t('category.adjustFilters')}</div>}
           </div>
         ) : (
           <div className="schemes-list">
-            {schemes.map(scheme => (
-              <div className="scheme-card" key={scheme._id || scheme.id}>
-                <h3>{(language === 'hi' && (scheme.name_hi || scheme.name_hindi)) ? (scheme.name_hi || scheme.name_hindi) : (language === 'te' && scheme.name_te) ? scheme.name_te : (scheme.name || scheme.title)}</h3>
-                <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation}</p>
-                <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
-                <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category}</p>
-                <p className="scheme-description">{(language === 'hi' && (scheme.description_hi || scheme.description_hindi)) ? (scheme.description_hi || scheme.description_hindi) : (language === 'te' && scheme.description_te) ? scheme.description_te : (scheme.description || t('category.noDescription'))}</p>
-              </div>
-            ))}
+            {schemes.map(scheme => {
+              const schemeName = (language === 'hi' && (scheme.name_hi || scheme.name_hindi)) 
+                ? (scheme.name_hi || scheme.name_hindi) 
+                : (language === 'te' && scheme.name_te) 
+                  ? scheme.name_te 
+                  : (scheme.name || scheme.title);
+
+              const schemeDescription = (language === 'hi' && (scheme.description_hi || scheme.description_hindi))
+                ? (scheme.description_hi || scheme.description_hindi)
+                : (language === 'te' && scheme.description_te)
+                  ? scheme.description_te
+                  : (scheme.description || t('category.noDescription'));
+
+              return (
+                <div className="scheme-card" key={scheme._id || scheme.id}>
+                  <h3 
+                    onClick={() => handleSchemeNameClick(scheme)}
+                    className={scheme.applyLink ? 'scheme-name-link' : ''}
+                    title={scheme.applyLink ? t('category.clickToApply') : ''}
+                  >
+                    {schemeName}
+                  </h3>
+                  <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation || t('category.notAvailable')}</p>
+                  <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
+                  <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category || t('category.notAvailable')}</p>
+                  <p className="scheme-description">{schemeDescription}</p>
+                  <button 
+                    className="scheme-bell-icon" 
+                    onClick={(e) => handleBellClick(e, scheme)}
+                    title={t('category.setReminder')}
+                  >
+                    🔔
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
+      <ReminderModal
+        isOpen={reminderModalOpen}
+        onClose={() => {
+          setReminderModalOpen(false);
+          setSelectedScheme(null);
+        }}
+        scheme={selectedScheme}
+        onCreateReminder={handleCreateReminder}
+      />
     </section>
   );
 };

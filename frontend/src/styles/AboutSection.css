@@ -9,6 +9,11 @@
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
+  background: #fff6ee;
+  border: 1px solid rgba(255,103,31,0.12);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(6, 3, 141, 0.06);
 }
 
 .about-section h2 {

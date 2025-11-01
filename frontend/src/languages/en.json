@@ -21,11 +21,14 @@
     "routeUsed": "Route Used",
     "searchByName": "Search by name",
     "searchPlaceholderExample": "Ex: Kisan...",
-    "noSchemes": "No schemes match your filters.",
-    "tryAdjust": "Try adjusting your filters or check if the backend is running.",
-    "loadingSchemes": "Loading schemes...",
+    "noMatchingSchemes": "No schemes match your filters.",
+    "adjustFilters": "Try adjusting your filters or check if the backend is running.",
+    "loading": "Loading schemes...",
     "all": "All",
-    "noDescription": "No description."
+    "noDescription": "No description available.",
+    "clickToApply": "Click to open application link",
+    "setReminder": "Set reminder for this scheme",
+    "notAvailable": "N/A"
   }
   ,
   "login": {
