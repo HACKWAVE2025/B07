@@ -1,6 +1,9 @@
 const User = require("../models/user");
 const express = require("express");
 const router = express.Router();
+router.use(express.urlencoded({ extended: true}));
+// router.use(cors());
+router.use(express.json());
 
 
 // inside your login route
