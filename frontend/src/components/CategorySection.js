@@ -99,9 +99,9 @@ const CategorySection = () => {
         endpoint = `/schemes/caste/${filters.caste}`;
         params = {};
       } else if (hasSearch && !hasAuthority && !hasOccupation && !hasState && !hasCaste) {
-        // If search query exists, fetch all schemes from database to search across everything
-        endpoint = '/schemes/get';
-        params = {};
+        // If search query exists from header, fetch schemes from both central and state (exclude private)
+        // Fetch central and state schemes separately, then combine and filter
+        endpoint = null; // Will handle with multiple requests
       } else {
         // Map occupation to backend category enum value if occupation is selected
         const mappedCategory = hasOccupation 
@@ -134,19 +134,36 @@ const CategorySection = () => {
         }
       }
 
-      const res = await api.get(endpoint, { params });
-      
-      // Handle response - backend returns array directly
-      let schemesData = res.data;
-      if (!Array.isArray(schemesData)) {
-        schemesData = [];
+      // Handle search from header (central and state only)
+      let schemesData = [];
+      if (endpoint === null && hasSearch && !hasAuthority && !hasOccupation && !hasState && !hasCaste) {
+        // Fetch schemes from both central and state authorities
+        try {
+          const [centralRes, stateRes] = await Promise.all([
+            api.get('/schemes/authority', { params: { authority: 'central' } }),
+            api.get('/schemes/authority', { params: { authority: 'state' } })
+          ]);
+          const centralSchemes = Array.isArray(centralRes.data) ? centralRes.data : [];
+          const stateSchemes = Array.isArray(stateRes.data) ? stateRes.data : [];
+          schemesData = [...centralSchemes, ...stateSchemes];
+        } catch (err) {
+          console.error('Error fetching schemes for header search:', err);
+          schemesData = [];
+        }
+      } else {
+        const res = await api.get(endpoint, { params });
+        schemesData = res.data;
+        if (!Array.isArray(schemesData)) {
+          schemesData = [];
+        }
       }
       
       // Apply search and caste filter on client side if not already filtered by backend
       let filtered = schemesData;
       
       // Filter by caste if not already filtered by backend endpoint
-      if (hasCaste && endpoint !== `/schemes/caste/${filters.caste}`) {
+      const wasCasteEndpoint = endpoint && endpoint === `/schemes/caste/${filters.caste}`;
+      if (hasCaste && !wasCasteEndpoint) {
         filtered = schemesData.filter(s => {
           const schemeCaste = s.eligibilityCriteria?.caste || s.caste || '';
           return schemeCaste.toUpperCase() === filters.caste.toUpperCase();
