@@ -12,26 +12,34 @@ const categories = [
 
 // Map frontend occupation display names to backend category enum values
 const occupationToCategoryMap = {
-  'Student': 'student',
-  'Farmer': 'farmer',
-  'Business': 'business',
-  'Senior Citizen': 'welfare',
-  'Women': 'women',
-  'Startup': 'startup',
-  'Small Business': 'business',
-  'Women Entrepreneur': 'women',
-  'Professional': 'other',
-  'Unemployed': 'welfare'
+  student: 'student',
+  farmer: 'farmer',
+  business: 'business',
+  senior_citizen: 'welfare',
+  women: 'women',
+  startup: 'startup',
+  small_business: 'business',
+  women_entrepreneur: 'women',
+  professional: 'other',
+  unemployed: 'welfare'
 };
 
 const occupations = {
-  central: ['Student', 'Farmer', 'Business', 'Senior Citizen', 'Women'],
-  state: ['Student', 'Farmer', 'Unemployed', 'Women', 'Senior Citizen'],
-  private: ['Student', 'Startup', 'Small Business', 'Women Entrepreneur', 'Professional']
+  central: ['student', 'farmer', 'business', 'senior_citizen', 'women'],
+  state: ['student', 'farmer', 'unemployed', 'women', 'senior_citizen'],
+  private: ['student', 'startup', 'small_business', 'women_entrepreneur', 'professional']
 };
 
+// States: keep `value` as backend-facing string, `labelKey` refers to translation entry
 const states = [
-  '', 'Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu', 'Kerala', 'Maharashtra', 'Delhi'
+  { value: '', labelKey: 'states.all' },
+  { value: 'Andhra Pradesh', labelKey: 'states.andhra_pradesh' },
+  { value: 'Telangana', labelKey: 'states.telangana' },
+  { value: 'Karnataka', labelKey: 'states.karnataka' },
+  { value: 'Tamil Nadu', labelKey: 'states.tamil_nadu' },
+  { value: 'Kerala', labelKey: 'states.kerala' },
+  { value: 'Maharashtra', labelKey: 'states.maharashtra' },
+  { value: 'Delhi', labelKey: 'states.delhi' }
 ];
 
 const castes = [
@@ -194,6 +202,29 @@ const CategorySection = () => {
     }
   };
 
+  // Helper to get localized occupation label from a key or backend value
+  const getOccupationLabel = (val) => {
+    if (!val) return t('category.notAvailable');
+    // If val matches one of our keys, translate directly
+    const translated = t(`occupations.${val}`);
+    if (translated && translated !== `occupations.${val}`) return translated;
+    // Otherwise try to map backend enum to a known key
+    const backendToKeyEntry = Object.entries(occupationToCategoryMap).find(([, backend]) => backend === val);
+    if (backendToKeyEntry) {
+      const key = backendToKeyEntry[0];
+      const backTranslated = t(`occupations.${key}`);
+      if (backTranslated && backTranslated !== `occupations.${key}`) return backTranslated;
+    }
+    return val;
+  };
+
+  const getStateLabel = (stateValue) => {
+    if (!stateValue) return t('category.all');
+    const found = states.find(s => s.value === stateValue);
+    if (found) return t(found.labelKey);
+    return stateValue;
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters(prev => {
       if (field === 'category') {
@@ -282,7 +313,7 @@ const CategorySection = () => {
           >
             <option value="">{t('category.all')}</option>
             {(occupations[filters.category] || []).map(o => (
-              <option key={o} value={o}>{o}</option>
+              <option key={o} value={o}>{t(`occupations.${o}`)}</option>
             ))}
           </select>
         </div>
@@ -290,8 +321,8 @@ const CategorySection = () => {
           <label>{t('category.stateLabel')}</label>
           <select value={filters.state} onChange={e => handleFilterChange('state', e.target.value)}>
             <option value="">{t('category.allStates')}</option>
-            {states.map(state => (
-              state && <option key={state} value={state}>{state}</option>
+            {states.map(s => (
+              s.value !== '' && <option key={s.value} value={s.value}>{t(s.labelKey)}</option>
             ))}
           </select>
         </div>
@@ -352,8 +383,8 @@ const CategorySection = () => {
                   >
                     {schemeName}
                   </h3>
-                  <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation || t('category.notAvailable')}</p>
-                  <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
+                  <p><b>{t('category.categoryLabel')}:</b> {getOccupationLabel(scheme.category || scheme.occupation)}</p>
+                  <p><b>{t('category.stateLabel')}:</b> {getStateLabel(scheme.state)}</p>
                   <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category || t('category.notAvailable')}</p>
                   <p className="scheme-description">{schemeDescription}</p>
                   <button 

@@ -33,6 +33,29 @@
     "notAvailable": "N/A"
   }
   ,
+  "occupations": {
+    "student": "Student",
+    "farmer": "Farmer",
+    "business": "Business",
+    "senior_citizen": "Senior Citizen",
+    "women": "Women",
+    "startup": "Startup",
+    "small_business": "Small Business",
+    "women_entrepreneur": "Women Entrepreneur",
+    "professional": "Professional",
+    "unemployed": "Unemployed"
+  },
+  "states": {
+    "all": "All",
+    "andhra_pradesh": "Andhra Pradesh",
+    "telangana": "Telangana",
+    "karnataka": "Karnataka",
+    "tamil_nadu": "Tamil Nadu",
+    "kerala": "Kerala",
+    "maharashtra": "Maharashtra",
+    "delhi": "Delhi"
+  }
+  ,
   "login": {
     "title": "Sign in to your account",
     "orCreate": "Or",

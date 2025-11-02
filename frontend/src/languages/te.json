@@ -43,6 +43,29 @@
     "setReminder": "ఈ పథకానికి రిమైండర్ సెట్ చేయండి",
     "notAvailable": "అందుబాటులో లేదు"
   },
+  "occupations": {
+    "student": "విద్యార్థి",
+    "farmer": "రైతు",
+    "business": "వ్యవసాయం",
+    "senior_citizen": "సీనియర్ సిటిజెన్",
+    "women": "మహిళలు",
+    "startup": "స్టార్టప్",
+    "small_business": "చిన్న వ్యాపారం",
+    "women_entrepreneur": "మహిళ వ్యాపారి",
+    "professional": "వృత్తికి చెందినవారు",
+    "unemployed": "ారు"
+  },
+  "states": {
+    "all": "అన్నీ",
+    "andhra_pradesh": "ఆంధ్ర ప్రదేశ్",
+    "telangana": "తెలంగాణ",
+    "karnataka": "కర్ణాటక",
+    "tamil_nadu": "తమిళనాడు",
+    "kerala": "కేరళ",
+    "maharashtra": "మహారాష్ట్ర",
+    "delhi": "దిల్లీ"
+  }
+  ,
   "register": {
     "title": "కొత్త ఖాతా సృష్టించండి",
     "alreadyHave": "ఇప్పుడే ఖాతా ఉందా?",

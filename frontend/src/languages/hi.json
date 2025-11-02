@@ -43,6 +43,29 @@
     "setReminder": "इस योजना के लिए रिमाइंडर सेट करें",
     "notAvailable": "उपलब्ध नहीं"
   },
+  "occupations": {
+    "student": "छात्र",
+    "farmer": "किसान",
+    "business": "व्यवसाय",
+    "senior_citizen": "वरिष्ठ नागरिक",
+    "women": "महिला",
+    "startup": "स्टार्टअप",
+    "small_business": "लघु व्यवसाय",
+    "women_entrepreneur": "महिला उद्यमी",
+    "professional": "व्यावसायिक",
+    "unemployed": "बेरोज़गार"
+  },
+  "states": {
+    "all": "सभी",
+    "andhra_pradesh": "आंध्र प्रदेश",
+    "telangana": "तेलंगाना",
+    "karnataka": "कर्नाटक",
+    "tamil_nadu": "तमिलनाडु",
+    "kerala": "केरल",
+    "maharashtra": "महाराष्ट्र",
+    "delhi": "दिल्ली"
+  }
+  ,
   "register": {
     "title": "नया खाता बनाएं",
     "alreadyHave": "पहले से एक खाता है?",
