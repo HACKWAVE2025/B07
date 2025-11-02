@@ -43,7 +43,7 @@ const states = [
 ];
 
 const castes = [
-  '', 'OC', 'OBC', 'SC', 'ST'
+  '', 'general', 'obc', 'sc', 'st'
 ];
 
 const CategorySection = () => {
@@ -174,7 +174,7 @@ const CategorySection = () => {
       if (hasCaste && !wasCasteEndpoint) {
         filtered = schemesData.filter(s => {
           const schemeCaste = s.eligibilityCriteria?.caste || s.caste || '';
-          return schemeCaste.toUpperCase() === filters.caste.toUpperCase();
+          return schemeCaste === filters.caste.toLowerCase();
         });
       }
       

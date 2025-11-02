@@ -178,10 +178,10 @@ const Register = () => {
                 <label>{t('register.caste')}</label>
                 <select name="caste" value={caste} onChange={handleChange}>
                   <option value="">Select Caste Category</option>
-                  <option value="OC">OC</option>
-                  <option value="OBC">OBC</option>
-                  <option value="SC">SC</option>
-                  <option value="ST">ST</option>
+                  <option value="general">general</option>
+                  <option value="obc">obc</option>
+                  <option value="sc">sc</option>
+                  <option value="st">st</option>
                 </select>
               </div>
             </div>

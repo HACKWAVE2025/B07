@@ -69,7 +69,7 @@ router.get("/category/:category", async (req, res) => {
 
 router.get("/caste/:caste",async(req,res)=>{
   try{
-    const caste = req.params.caste.toUpperCase();
+    const caste = req.params.caste.toLowerCase();
     const schemes = await Scheme.find({caste});
 
     if(!schemes || schemes.length === 0){ 
