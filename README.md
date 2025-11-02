@@ -7,6 +7,33 @@ There is a clear need for a unified platform the aggregates all scholarship and 
 
 
 
+## Tech Stack
+
+ Layer  Technology Used 
+ **Frontend**  React.js (with multilingual support using JSON translations) 
+ **Backend**  Node.js, Express.js 
+ **Database**  MongoDB (Mongoose) 
+ **Authentication**  JWT, bcrypt.js 
+ **Tools**  Axios, jsPDF, Google Calendar API 
+
+
+
+## ⚙️ Backend Setup
+
+### 1️⃣ Installation
+
+# Clone the repo
+git clone <repo-link>
+
+# Navigate to backend
+cd backend
+
+# Install dependencies
+npm install
+
+
+
+
 =>routes for login and register
     >api/users/login -- for login
     >api/users/register -- for register
