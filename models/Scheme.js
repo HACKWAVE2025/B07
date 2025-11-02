@@ -18,9 +18,9 @@ const schemeSchema = new mongoose.Schema({
     minAge: { type: Number, default: 0 },
     maxAge: { type: Number, default: 100 },
     occupation: [{ type: String }], // e.g. ["student", "farmer"]
-    incomeLimit: { type: Number },
+    incomeLimit: { type: mongoose.Schema.Types.Mixed },
     gender: [{ type: String }], // optional
-    caste: { type: String } // optional
+    caste: [ 'general', 'obc', 'sc', 'st' ]// optional
   },
   deadline: { type: Date },
   applyLink: { type: String },
