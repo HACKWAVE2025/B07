@@ -6,20 +6,20 @@ const Carousel = () => {
   
   const slides = [
     {
-      image: 'http://abhayapuricollege.in/wp-content/uploads/2024/09/Rythu-Bandhu-Scheme.webp',
+      image: 'https://ornatesolar.com/wp-content/uploads/2023/10/Solar-Subsidy.webp',
+      alt: 'Solar Subsidy'
+    },
+    {
+      image: 'https://www.cabkgoyal.com/wp-content/uploads/2024/02/Rythu-Bandhu.webp',
       alt: 'Rythu Bandhu Scheme'
     },
     {
-      image: 'https://www.godigit.com/content/dam/godigit/directportal/en/contenthm/pmkvy-scheme.jpg',
-      alt: 'PMKVY Scheme'
+      image: 'https://biharbhumilandrecord.com/wp-content/uploads/2024/10/PM-Kaushal-Vikas-Yojana.webp',
+      alt: 'PM Kaushal Vikas Yojana'
     },
     {
-      image: 'https://tfipost.com/wp-content/uploads/2022/12/Ayushman-Bharat-1.jpg',
-      alt: 'Ayushman Bharat'
-    },
-    {
-      image: 'https://www.iasgyan.in/ig-uploads/images/PM_Surya_Ghar_Muft_Bijli_Yojana.jpg',
-      alt: 'PM Surya Ghar Muft Bijli Yojana'
+      image: 'https://currentaffairs.adda247.com/wp-content/uploads/multisite/sites/5/2023/06/01144239/01-2023-06-01T144235.620.png',
+      alt: 'Government Scheme'
     }
   ];
 

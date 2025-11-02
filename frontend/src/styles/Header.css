@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 5%;
-  background-color: #FFFFFF;
+  background-color: transparent;
   color: white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -28,40 +28,60 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.user-section,
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .search-container {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .search-input {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
   border: 2px solid #ddd;
   border-radius: 4px 0 0 4px;
   font-size: 0.9rem;
   width: 250px;
   outline: none;
   transition: border-color 0.3s;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .search-input:focus {
   border-color: #FF671F;
 }
 
-.search-button {
-  background-color: #FF671F;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
+.search-submit-btn {
+  background: #FF671F;
+  border: 2px solid #FF671F;
+  border-left: none;
   border-radius: 0 4px 4px 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
   cursor: pointer;
-  font-weight: 500;
+  color: #fff;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
-.search-button:hover {
-  background-color: #e05a1a;
+.search-submit-btn:hover {
+  background: #e05a1a;
+  border-color: #e05a1a;
+}
+
+.search-submit-btn:active {
+  background: #d04a0a;
 }
 
 .auth-button {
@@ -171,15 +191,32 @@ a.auth-button {
   
   .search-container {
     width: 100%;
+    flex-direction: row;
   }
   
   .search-input {
     width: 100%;
+    padding-left: 2.5rem;
+    flex: 1;
+  }
+  
+  .search-submit-btn {
+    flex-shrink: 0;
+  }
+  
+  .user-section,
+  .auth-section {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
   }
   
   .auth-button {
-    width: 100%;
-    padding: 0.6rem;
+    width: auto;
+    padding: 0.6rem 1.2rem;
   }
 
   .profile-dropdown {
@@ -191,5 +228,17 @@ a.auth-button {
   .profile-trigger {
     padding: 0.5rem 1rem;
     font-size: 0.99rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.9rem 0.45rem 2.2rem;
+  }
+  
+  .search-icon {
+    font-size: 0.9rem;
+    left: 0.65rem;
   }
 }

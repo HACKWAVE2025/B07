@@ -112,6 +112,7 @@
   align-items: flex-start;
   padding: 3rem 5%;
   background: #f9f9f9;
+  min-height: fit-content;
 }
 
 .category-sidebar {
@@ -123,6 +124,9 @@
   min-width: 220px;
   max-width: 320px;
   border: 1.5px solid rgba(255,103,31,0.12);
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
 }
 
 .category-sidebar h2 {
@@ -131,6 +135,8 @@
   margin-bottom: 1.8rem;
   font-weight: 700;
   text-align: left;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .filter-group {
@@ -186,19 +192,59 @@ select, .filter-group input[type="text"] {
   background: transparent;
   border-radius: 14px;
   min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: flex-start;
 }
 .results-title {
-  font-size: 1.75rem;
+  font-size: 1.3rem;
   color: #06038D;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.8rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-align: left;
+  margin-top: 0;
+  padding-top: 0;
 }
 .schemes-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
   gap: 1.2rem;
+  /* Max height for 6 schemes in 2 rows (3 columns) */
+  /* Card min-height: 205px + content description, gap: 1.2rem */
+  /* Calculation: 2 rows × ~320px (allowing for description content) + 1 gap */
+  max-height: calc(2 * 320px + 1.2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+/* Scrollbar styling similar to filter inputs */
+.schemes-list::-webkit-scrollbar {
+  width: 16px;
+}
+
+.schemes-list::-webkit-scrollbar-track {
+  background: #fcfcfc;
+  border-radius: 10px;
+}
+
+.schemes-list::-webkit-scrollbar-thumb {
+  background: #d4d9df;
+  border-radius: 10px;
+  border: 1px solid #fcfcfc;
+}
+
+.schemes-list::-webkit-scrollbar-thumb:hover {
+  background: #c4c9cf;
+}
+
+/* Firefox scrollbar */
+.schemes-list {
+  scrollbar-width: auto;
+  scrollbar-color: #d4d9df #fcfcfc;
 }
 .scheme-card {
   background: #fff6ee;

@@ -12,26 +12,38 @@ const categories = [
 
 // Map frontend occupation display names to backend category enum values
 const occupationToCategoryMap = {
-  'Student': 'student',
-  'Farmer': 'farmer',
-  'Business': 'business',
-  'Senior Citizen': 'welfare',
-  'Women': 'women',
-  'Startup': 'startup',
-  'Small Business': 'business',
-  'Women Entrepreneur': 'women',
-  'Professional': 'other',
-  'Unemployed': 'welfare'
+  student: 'student',
+  farmer: 'farmer',
+  business: 'business',
+  senior_citizen: 'welfare',
+  women: 'women',
+  startup: 'startup',
+  small_business: 'business',
+  women_entrepreneur: 'women',
+  professional: 'other',
+  unemployed: 'welfare'
 };
 
 const occupations = {
-  central: ['Student', 'Farmer', 'Business', 'Senior Citizen', 'Women'],
-  state: ['Student', 'Farmer', 'Unemployed', 'Women', 'Senior Citizen'],
-  private: ['Student', 'Startup', 'Small Business', 'Women Entrepreneur', 'Professional']
+  central: ['student', 'farmer', 'business', 'senior_citizen', 'women'],
+  state: ['student', 'farmer', 'unemployed', 'women', 'senior_citizen'],
+  private: ['student', 'startup', 'small_business', 'women_entrepreneur', 'professional']
 };
 
+// States: keep `value` as backend-facing string, `labelKey` refers to translation entry
 const states = [
-  '', 'Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu', 'Kerala', 'Maharashtra', 'Delhi'
+  { value: '', labelKey: 'states.all' },
+  { value: 'Andhra Pradesh', labelKey: 'states.andhra_pradesh' },
+  { value: 'Telangana', labelKey: 'states.telangana' },
+  { value: 'Karnataka', labelKey: 'states.karnataka' },
+  { value: 'Tamil Nadu', labelKey: 'states.tamil_nadu' },
+  { value: 'Kerala', labelKey: 'states.kerala' },
+  { value: 'Maharashtra', labelKey: 'states.maharashtra' },
+  { value: 'Delhi', labelKey: 'states.delhi' }
+];
+
+const castes = [
+  '', 'OC', 'OBC', 'SC', 'ST'
 ];
 
 const CategorySection = () => {
@@ -39,16 +51,35 @@ const CategorySection = () => {
     category: 'central',
     occupation: '',
     state: '',
+    caste: '',
     search: ''
   });
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentRoute, setCurrentRoute] = useState('');
   const [error, setError] = useState('');
   const { t, language } = useContext(LanguageContext);
 
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState(null);
+  
+  // Check for search query from navigation state (from header search)
+  useEffect(() => {
+    const locationState = window.history.state?.usr;
+    if (locationState && locationState.searchQuery) {
+      // When searching from header, fetch all schemes first
+      setFilters(prev => ({
+        ...prev,
+        category: '',
+        occupation: '',
+        state: '',
+        caste: '',
+        search: locationState.searchQuery
+      }));
+      // Clear the state to prevent repeated application
+      window.history.replaceState({ ...window.history.state, usr: null }, '');
+    }
+  }, []);
+
   useEffect(() => {
     fetchSchemes();
     // eslint-disable-next-line
@@ -56,64 +87,108 @@ const CategorySection = () => {
 
   const fetchSchemes = async () => {
     setLoading(true);
+    setError('');
     try {
-      let endpoint = '/schemes/authoritycategory';
+      let endpoint = '/schemes/get';
       let params = {};
-      let routeLabel = '/api/schemes/get';
 
       // Determine which endpoint to use based on filters
       // Frontend "category" maps to backend "authority"
-      // Frontend "occupation" maps to backend "category"
+      // Frontend "occupation" needs to be mapped to backend "category" enum values
       
       const hasAuthority = filters.category && filters.category !== '';
       const hasState = filters.state && filters.state !== '';
       const hasOccupation = filters.occupation && filters.occupation !== '';
+      const hasCaste = filters.caste && filters.caste !== '';
+      const hasSearch = filters.search && filters.search.trim() !== '';
 
-      if (hasAuthority && (hasOccupation || hasState)) {
-        // Use authoritycategory endpoint when authority + category/state are selected
-        endpoint = '/schemes/authoritycategory';
-        params = {
-          authority: filters.category,
-        };
-        if (hasState) params.state = filters.state;
-        if (hasOccupation) params.category = filters.occupation;
-        
-        const queryString = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
-        routeLabel = `/api/schemes/authoritycategory?${queryString}`;
-      } else if (hasAuthority) {
-        // Use authority endpoint when only authority is selected
-        endpoint = '/schemes/authority';
-        params = {
-          authority: filters.category,
-        };
-        routeLabel = `/api/schemes/authority?authority=${filters.category}`;
-      } else if (hasOccupation && !hasAuthority) {
-        // If only occupation is selected, use category endpoint
-        endpoint = `/schemes/category/${filters.occupation}`;
-        routeLabel = `/api/schemes/category/${filters.occupation}`;
-      } else {
-        // Default: get all schemes
-        endpoint = '/schemes/get';
-        routeLabel = '/api/schemes/get';
+      // If only caste is selected, use caste endpoint
+      if (hasCaste && !hasAuthority && !hasOccupation && !hasState) {
+        endpoint = `/schemes/caste/${filters.caste}`;
         params = {};
+      } else if (hasSearch && !hasAuthority && !hasOccupation && !hasState && !hasCaste) {
+        // If search query exists from header, fetch schemes from both central and state (exclude private)
+        // Fetch central and state schemes separately, then combine and filter
+        endpoint = null; // Will handle with multiple requests
+      } else {
+        // Map occupation to backend category enum value if occupation is selected
+        const mappedCategory = hasOccupation 
+          ? (occupationToCategoryMap[filters.occupation] || filters.occupation.toLowerCase())
+          : null;
+
+        if (hasAuthority && (mappedCategory || hasState)) {
+          // Use authoritycategory endpoint when authority + category/state are selected
+          endpoint = '/schemes/authoritycategory';
+          params = {
+            authority: filters.category,
+          };
+          if (hasState) params.state = filters.state;
+          if (mappedCategory) params.category = mappedCategory;
+        } else if (hasAuthority) {
+          // Use authority endpoint when only authority is selected
+          endpoint = '/schemes/authority';
+          params = {
+            authority: filters.category,
+          };
+          if (hasState) params.state = filters.state;
+        } else if (mappedCategory && !hasAuthority) {
+          // If only occupation is selected, use category endpoint with mapped value
+          endpoint = `/schemes/category/${mappedCategory}`;
+          params = {};
+        } else {
+          // Default: get all schemes
+          endpoint = '/schemes/get';
+          params = {};
+        }
       }
 
-      setCurrentRoute(routeLabel);
-
-      const res = await api.get(endpoint, { params });
-      
-      // Handle response - backend returns array directly
-      let schemesData = res.data;
-      if (!Array.isArray(schemesData)) {
-        schemesData = [];
+      // Handle search from header (central and state only)
+      let schemesData = [];
+      if (endpoint === null && hasSearch && !hasAuthority && !hasOccupation && !hasState && !hasCaste) {
+        // Fetch schemes from both central and state authorities
+        try {
+          const [centralRes, stateRes] = await Promise.all([
+            api.get('/schemes/authority', { params: { authority: 'central' } }),
+            api.get('/schemes/authority', { params: { authority: 'state' } })
+          ]);
+          const centralSchemes = Array.isArray(centralRes.data) ? centralRes.data : [];
+          const stateSchemes = Array.isArray(stateRes.data) ? stateRes.data : [];
+          schemesData = [...centralSchemes, ...stateSchemes];
+        } catch (err) {
+          console.error('Error fetching schemes for header search:', err);
+          schemesData = [];
+        }
+      } else {
+        const res = await api.get(endpoint, { params });
+        schemesData = res.data;
+        if (!Array.isArray(schemesData)) {
+          schemesData = [];
+        }
       }
       
-      // Apply search filter on client side
+      // Apply search and caste filter on client side if not already filtered by backend
       let filtered = schemesData;
+      
+      // Filter by caste if not already filtered by backend endpoint
+      const wasCasteEndpoint = endpoint && endpoint === `/schemes/caste/${filters.caste}`;
+      if (hasCaste && !wasCasteEndpoint) {
+        filtered = schemesData.filter(s => {
+          const schemeCaste = s.eligibilityCriteria?.caste || s.caste || '';
+          return schemeCaste.toUpperCase() === filters.caste.toUpperCase();
+        });
+      }
+      
+      // Apply search filter
       if (filters.search && filters.search.trim() !== '') {
-        filtered = schemesData.filter(s => 
-          s.name?.toLowerCase().includes(filters.search.toLowerCase())
-        );
+        const searchLower = filters.search.toLowerCase();
+        filtered = filtered.filter(s => {
+          const name = (s.name || '').toLowerCase();
+          const description = (s.description || '').toLowerCase();
+          const category = (s.category || '').toLowerCase();
+          return name.includes(searchLower) || 
+                 description.includes(searchLower) || 
+                 category.includes(searchLower);
+        });
       }
       
       setSchemes(filtered);
@@ -127,16 +202,42 @@ const CategorySection = () => {
     }
   };
 
+  // Helper to get localized occupation label from a key or backend value
+  const getOccupationLabel = (val) => {
+    if (!val) return t('category.notAvailable');
+    // If val matches one of our keys, translate directly
+    const translated = t(`occupations.${val}`);
+    if (translated && translated !== `occupations.${val}`) return translated;
+    // Otherwise try to map backend enum to a known key
+    const backendToKeyEntry = Object.entries(occupationToCategoryMap).find(([, backend]) => backend === val);
+    if (backendToKeyEntry) {
+      const key = backendToKeyEntry[0];
+      const backTranslated = t(`occupations.${key}`);
+      if (backTranslated && backTranslated !== `occupations.${key}`) return backTranslated;
+    }
+    return val;
+  };
+
+  const getStateLabel = (stateValue) => {
+    if (!stateValue) return t('category.all');
+    const found = states.find(s => s.value === stateValue);
+    if (found) return t(found.labelKey);
+    return stateValue;
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters(prev => {
       if (field === 'category') {
-        return { ...prev, category: value, occupation: '', state: '', search: '' };
+        return { ...prev, category: value, occupation: '', state: '', caste: '', search: '' };
       }
       if (field === 'occupation') {
         return { ...prev, occupation: value };
       }
       if (field === 'state') {
         return { ...prev, state: value };
+      }
+      if (field === 'caste') {
+        return { ...prev, caste: value };
       }
       if (field === 'search') {
         return { ...prev, search: value };
@@ -188,7 +289,7 @@ const CategorySection = () => {
   return (
     <section className="category-explorer-main">
       <aside className="category-sidebar">
-        <h2>Filters</h2>
+        <h2>{t('category.filters')}</h2>
         <div className="filter-group">
           <label>{t('category.schemeCategory')}</label>
           <div className="filter-btns-vertical">
@@ -212,7 +313,7 @@ const CategorySection = () => {
           >
             <option value="">{t('category.all')}</option>
             {(occupations[filters.category] || []).map(o => (
-              <option key={o} value={o}>{o}</option>
+              <option key={o} value={o}>{t(`occupations.${o}`)}</option>
             ))}
           </select>
         </div>
@@ -220,8 +321,17 @@ const CategorySection = () => {
           <label>{t('category.stateLabel')}</label>
           <select value={filters.state} onChange={e => handleFilterChange('state', e.target.value)}>
             <option value="">{t('category.allStates')}</option>
-            {states.map(state => (
-              state && <option key={state} value={state}>{state}</option>
+            {states.map(s => (
+              s.value !== '' && <option key={s.value} value={s.value}>{t(s.labelKey)}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-group">
+          <label>{t('category.casteLabel')}</label>
+          <select value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
+            <option value="">{t('category.allCastes')}</option>
+            {castes.map(caste => (
+              caste && <option key={caste} value={caste}>{caste}</option>
             ))}
           </select>
         </div>
@@ -236,9 +346,6 @@ const CategorySection = () => {
         </div>
       </aside>
       <main className="scheme-results-area">
-        <div style={{marginBottom: '1rem'}}>
-          <span style={{fontSize: '0.96rem', color: '#666'}}>{t('category.routeUsed')}: <span style={{fontFamily: 'monospace', color: '#06038D'}}>{currentRoute}</span></span>
-        </div>
         <h2 className="results-title">{t('category.schemes')}</h2>
         {error && (
           <div style={{padding: '1rem', background: '#fff0f0', border: '1px solid #f5c2c2', borderRadius: '6px', color: '#a00', marginBottom: '1rem'}}>
@@ -276,8 +383,8 @@ const CategorySection = () => {
                   >
                     {schemeName}
                   </h3>
-                  <p><b>{t('category.categoryLabel')}:</b> {scheme.category || scheme.occupation || t('category.notAvailable')}</p>
-                  <p><b>{t('category.stateLabel')}:</b> {scheme.state || t('category.all')}</p>
+                  <p><b>{t('category.categoryLabel')}:</b> {getOccupationLabel(scheme.category || scheme.occupation)}</p>
+                  <p><b>{t('category.stateLabel')}:</b> {getStateLabel(scheme.state)}</p>
                   <p><b>{t('category.authority')}:</b> {scheme.authority || filters.category || t('category.notAvailable')}</p>
                   <p className="scheme-description">{schemeDescription}</p>
                   <button 
