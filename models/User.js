@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   state: { type: String },
   age: { type: Number },
   gender: { type: String, enum: ["male", "female", "other"] },
-  caste: { type: String, enum: ["OC", "OBC", "SC", "ST"] },
+  caste: { type: String, enum: ["general", "obc", "sc", "st"] },
   eligibleSchemes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Scheme" }],
   createdAt: { type: Date, default: Date.now },
 });

@@ -13,6 +13,8 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const schemeRoutes = require("./routes/schemeRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
+const eligibilityRoutes = require("./routes/eligibilityRoutes");
+
 
 
 // Load environment variables
@@ -30,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", authRoutes);
 app.use("/api/schemes", schemeRoutes);
 app.use("/api/reminders", reminderRoutes);
+app.use("/api/eligibility", eligibilityRoutes);
 
 app.get("/", (req, res) => res.send("Server running 🚀"));
 
