@@ -35,6 +35,16 @@ npm install
 email : priya@example.com
 password : 123456
 
+#Features worthy to check
+multi-lingual(only available 2 languages for now(telugu, hindi))
+chatbot
+eligibity check only after login
+filters 
+remainders directly to the gmail(if correct) with date and time 
+
+#Future addons
+will be authenticated using digilocker
+will be using apis
 
 #Use this .env for further checking
 MONGO_URI=mongodb+srv://scheme_connect:dhanush12032006@schemeconnect.n5aej7q.mongodb.net/?appName=schemeconnect
