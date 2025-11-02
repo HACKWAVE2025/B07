@@ -31,7 +31,21 @@ cd backend
 # Install dependencies
 npm install
 
+#Check with this credintials
+email : priya@example.com
+password : 123456
 
+
+#Use this .env for further checking
+MONGO_URI=mongodb+srv://scheme_connect:dhanush12032006@schemeconnect.n5aej7q.mongodb.net/?appName=schemeconnect
+PORT=5000
+EMAIL_SERVICE=gmail
+EMAIL_USER=komatireddydhanushreddy@gmail.com
+EMAIL_PASS=qolcbtivicsidzoz
+EMAIL_FROM=komatireddydhanushreddy@gmail.comf
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRES_IN=1d
+GEMINI_API_KEY=AIzaSyDs0Kyt8iX2eVRRNQywl847etuimnN4RB0
 
 
 =>routes for login and register

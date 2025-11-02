@@ -4,6 +4,7 @@ import '../styles/Header.css';
 import { LanguageContext } from '../context/LanguageContext';
 import api from '../utils/api';
 import LanguageSelector from './LanguageSelector';
+import EligibleSchemesButton from './EligibleSchemesButton';
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -95,6 +96,7 @@ const Header = () => {
         </form>
         {user ? (
           <div className="user-section">
+            <EligibleSchemesButton userId={user.id} />
             <div className="profile-dropdown-wrapper" ref={dropdownRef}>
               <button
                 className="profile-trigger"
